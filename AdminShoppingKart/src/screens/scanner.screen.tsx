@@ -39,6 +39,8 @@ import {OrderShipmentGroupStatus} from '../models/ordershipmentgroup.model';
 import {SkuBarcodeMapService} from '../services/skubarcodemap.service';
 import {UsersService} from '../services/users.service';
 import {environment} from '../utils/environment';
+import {useAppSelector} from '../redux/hooks.redux';
+import {selectenvironment} from '../redux/environment.redux';
 import {formatDate, formatDateTime} from '../utils/date.utils';
 import {formatPrice} from '../utils/format.utils';
 import {BottomSheet} from '../components/bottomsheet.component';
@@ -51,6 +53,7 @@ export function ScannerScreen() {
   const route = useRoute<ScannerScreenRouteProp>();
   const navigation = useNavigation<ScannerScreenNavigationProp>();
   const appNavigation = useNavigation<AppNavigationProp>();
+  const environmentState = useAppSelector(selectenvironment);
   const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState<OrderGetWithDetailsRes[]>([]);
@@ -72,7 +75,7 @@ export function ScannerScreen() {
   const orderGroupService = useRef(new OrderGroupService()).current;
   const skuBarcodeMapService = useRef(new SkuBarcodeMapService()).current;
   const usersService = useRef(new UsersService()).current;
-  
+
   // Track if we've already loaded the groupid to prevent infinite loops
   const hasLoadedGroupId = useRef<number | null>(null);
 
@@ -171,7 +174,7 @@ export function ScannerScreen() {
       if (isNumeric(text)) {
         const numValue = parseInt(text.trim());
         console.log('🔍 Text is numeric, trying as Order Group ID:', numValue);
-
+        
         // Try as order group ID
         const foundAsGroupId = await searchByOrderGroupId(numValue);
         if (foundAsGroupId) {
@@ -200,7 +203,7 @@ export function ScannerScreen() {
 
       // Step 4: Search orders by SKU IDs
       const allOrders: OrderGetWithDetailsRes[] = [];
-
+      
       for (const skuId of skuIds) {
         const orderReq = {
           getall: false,
@@ -339,7 +342,8 @@ export function ScannerScreen() {
 
   const getImageUrl = (fileid?: number): string => {
     if (!fileid) return '';
-    return `${environment.baseurl}/api/Files/get?id=${fileid}`;
+    const baseurl = environmentState.url || environment.baseurl;
+    return `${baseurl}/api/Files/get?id=${fileid}`;
   };
 
   // Status management functions
@@ -353,26 +357,6 @@ export function ScannerScreen() {
         await usersService.OrderConfirm({
           orderid: orderStatusData.orderid,
           notes: statusNotes || '',
-        });
-      } else if (orderStatusData.orderstatus === Orders.OrderStatuses.Confirmed) {
-        await usersService.OrderPicked({
-          orderid: orderStatusData.orderid,
-          notes: statusNotes || '',
-        });
-      } else if (orderStatusData.orderstatus === Orders.OrderStatuses.Picked) {
-        await usersService.OrderChecked({
-          orderid: orderStatusData.orderid,
-          notes: statusNotes || '',
-        });
-      } else if (orderStatusData.orderstatus === Orders.OrderStatuses.Checked) {
-        await usersService.OrderPacked({
-          orderid: orderStatusData.orderid,
-          notes: statusNotes || '',
-        });
-      } else {
-        await ordersService.moveToNextStatus({
-          orderid: orderStatusData.orderid,
-          note: statusNotes,
         });
       }
       
@@ -497,7 +481,7 @@ export function ScannerScreen() {
           } finally {
             setIsLoading(false);
           }
-          }}>
+        }}>
         <View style={[$.flex_row, $.justify_content_spaceBetween, $.align_items_center, $.mb_2]}>
           <Text style={[$.h4, $.font_weight_bold, {color: Colors.text}]}>#{item.id}</Text>
           <View style={[$.px_2, $.py_1, $.border_rounded, {backgroundColor: statusColor.bg}]}>
@@ -558,24 +542,24 @@ export function ScannerScreen() {
     <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
       <View style={[$.flex_1, $.px_3]}>
         <View style={styles.searchContainer}>
-          <View style={[$.flex_1, $.mr_2]}>
-            <FormInput
-              label="Search Order"
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholder="Enter Order ID, Group ID, or Barcode"
-              keyboardType="default"
-              editable={!isLoading}
-              onSubmitEditing={handleSearchSubmit}
-              returnKeyType="search"
-            />
+          <View style={[$.flex_1]}>
+          <FormInput
+            label="Search Order"
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Enter Order ID, Group ID, or Barcode"
+            keyboardType="default"
+            editable={!isLoading}
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
+          />
           </View>
           <TouchableOpacity
             style={styles.qrButton}
             onPress={handleOpenQRScanner}
             disabled={isLoading}
             activeOpacity={0.7}>
-            <CustomIcon name={CustomIcons.QRCode} color={Colors.background} size={24} />
+            <CustomIcon name={CustomIcons.QRCode} color={Colors.text} size={32} />
           </TouchableOpacity>
         </View>
 
@@ -589,12 +573,12 @@ export function ScannerScreen() {
         {searchPerformed && !isLoading && (
           <View style={[$.mt_5, $.flex_1]}>
             {searchMode === 'ordergroupid' && orderGroupSummary ? (
-              <ScrollView style={$.flex_1} showsVerticalScrollIndicator={true}>
+              <ScrollView style={$.flex_1} showsVerticalScrollIndicator={true} contentContainerStyle={styles.scrollContent}>
                 {/* Order Group Header */}
-                <View style={[styles.orderGroupCard, $.mb_3]}>
+                <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                   <Text style={[$.h3, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
-                    Order Group #{orderGroupSummary.ordergroup.ordergroupid}
-                  </Text>
+                  Order Group #{orderGroupSummary.ordergroup.ordergroupid}
+                </Text>
                   <View style={styles.infoRow}>
                     <Text style={[$.h6, {color: Colors.textSecondary, width: 120}]}>
                       Created On:
@@ -623,7 +607,7 @@ export function ScannerScreen() {
 
                 {/* Delivery Information */}
                 {orderGroupSummary.ordergroup.completedeliveryaddress && (
-                  <View style={[styles.orderGroupCard, $.mb_3]}>
+                  <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                     <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
                       Delivery Information
                     </Text>
@@ -671,7 +655,7 @@ export function ScannerScreen() {
 
                 {/* Pickup Information */}
                 {orderGroupSummary.ordergroup.completepickupaddress && (
-                  <View style={[styles.orderGroupCard, $.mb_3]}>
+                  <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                     <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
                       Pickup Information
                     </Text>
@@ -709,14 +693,14 @@ export function ScannerScreen() {
 
                 {/* Orders List */}
                 {orderGroupSummary.orderlist && orderGroupSummary.orderlist.length > 0 && (
-                  <View style={[styles.orderGroupCard, $.mb_3]}>
+                  <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                     <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
                       Orders ({orderGroupSummary.orderlist.length})
                     </Text>
                     {orderGroupSummary.orderlist.map((order, index) => (
                       <TouchableOpacity
                         key={index}
-                        style={[styles.orderItemCard, $.mb_2]}
+                        style={[styles.orderItemCard, styles.cardSpacingSmall]}
                         onPress={() => {
                           // Navigate to order details or show status sheet
                           handleViewOrderStatus(order.orderid);
@@ -724,7 +708,7 @@ export function ScannerScreen() {
                         <View style={styles.orderItemRow}>
                           {order.fileid && (
                             <Image
-                              source={{uri: `${environment.baseurl}/api/Files/get?id=${order.fileid}`}}
+                              source={{uri: getImageUrl(order.fileid)}}
                               style={styles.orderImage}
                               resizeMode="cover"
                             />
@@ -760,12 +744,12 @@ export function ScannerScreen() {
 
                 {/* Payment List */}
                 {orderGroupSummary.paymentlist && orderGroupSummary.paymentlist.length > 0 && (
-                  <View style={[styles.orderGroupCard, $.mb_3]}>
+                  <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                     <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
                       Payments ({orderGroupSummary.paymentlist.length})
                     </Text>
                     {orderGroupSummary.paymentlist.map((payment, index) => (
-                      <View key={index} style={[styles.paymentItem, $.mb_2]}>
+                      <View key={index} style={[styles.paymentItem, styles.cardSpacingSmall]}>
                         <View style={styles.infoRow}>
                           <Text style={[$.h6, {color: Colors.textSecondary, width: 120}]}>
                             {payment.paymentmodename}:
@@ -797,7 +781,7 @@ export function ScannerScreen() {
 
                 {/* Shipment List */}
                 {orderGroupSummary.shipmentlist && orderGroupSummary.shipmentlist.length > 0 && (
-                  <View style={[styles.orderGroupCard, $.mb_3]}>
+                  <View style={[styles.orderGroupCard, styles.cardSpacing]}>
                     <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
                       Shipments ({orderGroupSummary.shipmentlist.length})
                     </Text>
@@ -913,7 +897,7 @@ export function ScannerScreen() {
               <View style={[styles.statusBadgeSmall, {backgroundColor: getOrderStatusColor(orderStatusData.orderstatus).bg}]}>
                 <Text style={[$.h7, $.font_weight_600, {color: getOrderStatusColor(orderStatusData.orderstatus).text}]}>
                   {getOrderStatusName(orderStatusData.orderstatus)}
-                </Text>
+            </Text>
               </View>
             </View>
 
@@ -993,7 +977,7 @@ export function ScannerScreen() {
 
             {/* Status Timeline */}
             {orderStatusData.orderhistory?.statushistory && orderStatusData.orderhistory.statushistory.length > 0 && (
-              <View style={[styles.statusCard, $.mb_3]}>
+              <View style={[styles.statusCard, styles.cardSpacing]}>
                 <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
                   Status Timeline
                 </Text>
@@ -1017,6 +1001,23 @@ export function ScannerScreen() {
                     </View>
                   );
                 })}
+              </View>
+            )}
+
+            {/* Notes Input - Show above action buttons if any action buttons are available */}
+            {(orderStatusData.orderstatus === Orders.OrderStatuses.Placed ||
+              orderStatusData.orderstatus === Orders.OrderStatuses.Confirmed ||
+              orderStatusData.cancancel ||
+              orderStatusData.canrefund) && (
+              <View style={[$.mb_3]}>
+                <FormInput
+                  label="Notes"
+                  value={statusNotes}
+                  onChangeText={setStatusNotes}
+                  placeholder="Enter notes..."
+                  multiline={true}
+                  numberOfLines={3}
+                />
               </View>
             )}
 
@@ -1062,75 +1063,6 @@ export function ScannerScreen() {
                 </TouchableOpacity>
               )}
 
-              {/* Checked Button (for Picked status) */}
-              {orderStatusData.orderstatus === Orders.OrderStatuses.Picked && (
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    {backgroundColor: ColorPalette.primaryDark},
-                    $.mb_2,
-                  ]}
-                  onPress={handleMoveToNextStatus}
-                  disabled={isUpdatingStatus}>
-                  {isUpdatingStatus ? (
-                    <ActivityIndicator size="small" color={Colors.background} />
-                  ) : (
-                    <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
-                      Checked
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
-
-              {/* Packed Button (for Checked status) */}
-              {orderStatusData.orderstatus === Orders.OrderStatuses.Checked && (
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    {backgroundColor: ColorPalette.primaryDark},
-                    $.mb_2,
-                  ]}
-                  onPress={handleMoveToNextStatus}
-                  disabled={isUpdatingStatus}>
-                  {isUpdatingStatus ? (
-                    <ActivityIndicator size="small" color={Colors.background} />
-                  ) : (
-                    <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
-                      Packed
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
-
-              {/* Move to Next Status Button (for other statuses) */}
-              {orderStatusData.orderstatus !== Orders.OrderStatuses.Placed && 
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Confirmed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Picked &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Checked &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Packed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Delivered &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Cancelled &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Closed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Refunded &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.RefundFailed && (
-                <TouchableOpacity
-                  style={[
-                    styles.actionButton,
-                    {backgroundColor: ColorPalette.primaryDark},
-                    $.mb_2,
-                  ]}
-                  onPress={handleMoveToNextStatus}
-                  disabled={isUpdatingStatus}>
-                  {isUpdatingStatus ? (
-                    <ActivityIndicator size="small" color={Colors.background} />
-                  ) : (
-                    <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
-                      Move to Next Status
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
-
               {/* Cancel Order Button */}
               {orderStatusData.cancancel && (
                 <TouchableOpacity
@@ -1147,7 +1079,7 @@ export function ScannerScreen() {
                     <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
                       Cancel Order
                     </Text>
-                  )}
+            )}
                 </TouchableOpacity>
               )}
 
@@ -1167,35 +1099,6 @@ export function ScannerScreen() {
                 </TouchableOpacity>
               )}
             </View>
-
-            {/* Notes Input - Only show if there are action buttons */}
-            {(orderStatusData.orderstatus === Orders.OrderStatuses.Placed ||
-              orderStatusData.orderstatus === Orders.OrderStatuses.Confirmed ||
-              orderStatusData.orderstatus === Orders.OrderStatuses.Picked ||
-              orderStatusData.orderstatus === Orders.OrderStatuses.Checked ||
-              (orderStatusData.orderstatus !== Orders.OrderStatuses.Placed && 
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Confirmed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Picked &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Checked &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Packed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Delivered &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Cancelled &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Closed &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.Refunded &&
-               orderStatusData.orderstatus !== Orders.OrderStatuses.RefundFailed) ||
-              orderStatusData.cancancel ||
-              orderStatusData.canrefund) && (
-              <View style={[$.mb_3]}>
-                <FormInput
-                  label="Notes"
-                  value={statusNotes}
-                  onChangeText={setStatusNotes}
-                  placeholder="Enter notes..."
-                  multiline={true}
-                  numberOfLines={3}
-                />
-              </View>
-            )}
           </>
         ) : (
           <View style={[$.flex_1, $.justify_content_center, $.align_items_center, $.py_6]}>
@@ -1237,17 +1140,26 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
     marginTop: 12,
+    gap: 4,
   },
   qrButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: Colors.inputBackground,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
-    marginLeft: 8,
-    ...$.shadow_medium,
+    marginTop: 28,
+    padding: 0,
+  },
+  scrollContent: {
+    padding: 12,
+  },
+  cardSpacing: {
+    marginBottom: 12,
+  },
+  cardSpacingSmall: {
+    marginBottom: 8,
   },
   orderGroupCard: {
     backgroundColor: Colors.inputBackground,

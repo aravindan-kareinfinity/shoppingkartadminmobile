@@ -3,12 +3,32 @@ import {environment} from './environment';
 import {store} from '../redux/store.redux';
 import {AuthService} from '../services/auth.service';
 import {usercontextactions} from '../redux/usercontext.redux';
+import {authactions} from '../redux/auth.redux';
+import {ErrorCodes} from '../models/actionres.model';
 
 // Initialize auth service
 const authService = new AuthService();
 
+// Get base URL from Redux or fallback to environment default
+const getBaseUrl = () => {
+  try {
+    const state = store.getState();
+    return state.environment?.url || environment.baseurl;
+  } catch {
+    return environment.baseurl;
+  }
+};
+
 // Set the base URL for all axios requests
-axios.defaults.baseURL = environment.baseurl;
+axios.defaults.baseURL = getBaseUrl();
+
+// Update base URL when Redux state changes
+store.subscribe(() => {
+  const newBaseUrl = getBaseUrl();
+  if (axios.defaults.baseURL !== newBaseUrl) {
+    axios.defaults.baseURL = newBaseUrl;
+  }
+});
 
 // Token refresh queue management
 let isRefreshing = false;
@@ -66,17 +86,12 @@ axios.interceptors.request.use(
         source: rootState.value.accesstoken ? 'Redux' : token ? 'AsyncStorage' : 'None',
       });
       
+      // Add Authorization header if token is available
       if (token) {
-        // Ensure headers object exists
-        if (!config.headers) {
-          config.headers = {};
-        }
-        // Set Authorization header with Bearer prefix (matching backend expectation)
+        config.headers = config.headers || {};
         config.headers['Authorization'] = 'Bearer ' + token;
-        console.log('✅ Authorization header set with Bearer prefix');
-      } else {
-        console.warn('⚠️ No token found in Redux store or AsyncStorage - request will fail authentication');
       }
+      
     } catch (error) {
       console.error('❌ Error getting auth token:', error);
     }
@@ -150,6 +165,27 @@ axios.interceptors.response.use(
 
     var originalrequest = error.config;
 
+    // Check for SessionExpired error code in response
+    const errorCode = error?.response?.data?.code;
+    const isSessionExpired = errorCode === ErrorCodes.SessionExpired || errorCode === ErrorCodes.InvalidSession;
+    
+    // Handle session expiration - logout immediately without attempting refresh
+    if (isSessionExpired) {
+      console.log('🔐 Session expired - Logging out user');
+      
+      // Dispatch logout actions immediately (synchronous)
+      store.dispatch(usercontextactions.clear());
+      store.dispatch(authactions.logout());
+      
+      // Clear tokens from AsyncStorage (async, but don't wait)
+      const authService = new AuthService();
+      authService.logout().catch((err) => {
+        console.error('Error clearing AsyncStorage during logout:', err);
+      });
+      
+      return Promise.reject(error);
+    }
+
     let statuscode = error?.response?.status;
     if (statuscode == 401 && originalrequest && !originalrequest._retry) {
       console.log('🔐 Unauthorized access (401) - Attempting token refresh');
@@ -205,6 +241,7 @@ axios.interceptors.response.use(
           // Clear tokens and logout
           await authService.logout();
           store.dispatch(usercontextactions.clear());
+          store.dispatch(authactions.logout());
           
           reject(refreshError);
         } finally {

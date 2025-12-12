@@ -31,6 +31,8 @@ import {
   PopularOrdersRes,
 } from '../models/orders.model';
 import {environment} from '../utils/environment';
+import {useAppSelector} from '../redux/hooks.redux';
+import {selectenvironment} from '../redux/environment.redux';
 import {CustomIcon, CustomIcons} from '../components/customicons.component';
 import {useAppDispatch} from '../redux';
 import {logout} from '../redux/auth.redux';
@@ -68,6 +70,7 @@ const getLightColor = (index: number): string => {
 export function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
   const dispatch = useAppDispatch();
+  const environmentState = useAppSelector(selectenvironment);
   const [isLoading, setIsLoading] = useState(false);
   const [tabIndex, setTabIndex] = useState(1); // 1: Today, 2: Week, 3: Month, 4: Year
   const [commonList, setCommonList] = useState<ChartDataRes[]>([]);
@@ -411,7 +414,8 @@ export function DashboardScreen() {
   };
 
   const getFileUrl = (fileId: number) => {
-    return `${environment.baseurl}/api/Files/get?id=${fileId}`;
+    const baseurl = environmentState.url || environment.baseurl;
+    return `${baseurl}/api/Files/get?id=${fileId}`;
   };
 
   const handleLogout = () => {

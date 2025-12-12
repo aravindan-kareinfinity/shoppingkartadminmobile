@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {persistReducer, persistStore} from 'redux-persist';
 import {authreducer} from './auth.redux';
 import {usercontextreducers} from './usercontext.redux';
+import {environmentreducers} from './environment.redux';
 
 const persistConfig = {
   key: 'root',
@@ -13,6 +14,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authreducer,
   usercontext: usercontextreducers,
+  environment: environmentreducers,
   // Add other reducers here
 });
 

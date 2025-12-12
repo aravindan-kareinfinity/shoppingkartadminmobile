@@ -9,9 +9,9 @@ export function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
       </PersistGate>
     </Provider>
   );

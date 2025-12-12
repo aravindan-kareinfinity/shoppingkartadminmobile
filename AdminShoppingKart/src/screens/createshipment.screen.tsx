@@ -28,6 +28,8 @@ import {formatPrice} from '../utils/format.utils';
 import {formatDateTime} from '../utils/date.utils';
 import {Image} from 'react-native';
 import {environment} from '../utils/environment';
+import {useAppSelector} from '../redux/hooks.redux';
+import {selectenvironment} from '../redux/environment.redux';
 
 type CreateShipmentScreenRouteProp = RouteProp<AppStackParamList, 'CreateShipment'>;
 type CreateShipmentScreenNavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -35,6 +37,7 @@ type CreateShipmentScreenNavigationProp = NativeStackNavigationProp<AppStackPara
 export function CreateShipmentScreen() {
   const route = useRoute<CreateShipmentScreenRouteProp>();
   const navigation = useNavigation<CreateShipmentScreenNavigationProp>();
+  const environmentState = useAppSelector(selectenvironment);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -200,7 +203,8 @@ export function CreateShipmentScreen() {
 
   const getImageUrl = (fileid?: number): string => {
     if (!fileid) return '';
-    return `${environment.baseurl}/api/Files/get?id=${fileid}`;
+    const baseurl = environmentState.url || environment.baseurl;
+    return `${baseurl}/api/Files/get?id=${fileid}`;
   };
 
   const handleRequestPickup = async () => {

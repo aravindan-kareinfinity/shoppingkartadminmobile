@@ -8,17 +8,18 @@ import {
 } from '../models/orders.model';
 
 export class OrderGroupService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = environment.baseurl;
+  // Get base URL directly from Redux store
+  private getBaseUrl(): string {
+    const store = require('../redux/store.redux').store;
+    const state = store.getState();
+    return state?.environment?.url || require('../utils/environment').environment.baseurl;
   }
 
   async adminPanelOrderSummaryV3(req: OrderGroupAdminPanelOrderSummaryV3Req): Promise<OrderGroupAdminPanelOrderSummaryV3Res> {
     var postData: ActionReq<OrderGroupAdminPanelOrderSummaryV3Req> = new ActionReq<OrderGroupAdminPanelOrderSummaryV3Req>();
     postData.item = req;
     var resp = await axios.post<ActionRes<OrderGroupAdminPanelOrderSummaryV3Res>>(
-      `${this.baseUrl}/api/OrderGroup/AdminPanelOrderSummaryV3`,
+      `${this.getBaseUrl()}/api/OrderGroup/AdminPanelOrderSummaryV3`,
       postData
     );
     if (resp.data.item) {

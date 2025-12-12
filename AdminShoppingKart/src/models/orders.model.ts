@@ -9,9 +9,6 @@ export namespace Orders {
     None = 0,
     Placed = 100,
     Confirmed = 200,
-    Picked = 230,
-    Checked = 260,
-    Packed = 290,
     Shipped = 300,
     OutForDelivery = 400,
     Delivered = 500,
@@ -30,12 +27,6 @@ export namespace Orders {
         return 'Order Placed';
       case OrderStatuses.Confirmed:
         return 'Order Confirmed';
-      case OrderStatuses.Picked:
-        return 'Picked';
-      case OrderStatuses.Checked:
-        return 'Checked';
-      case OrderStatuses.Packed:
-        return 'Packed';
       case OrderStatuses.Shipped:
         return 'Shipped';
       case OrderStatuses.OutForDelivery:
@@ -106,9 +97,6 @@ export function getOrderStatusColor(status: number): {bg: string; text: string} 
   const colorMap: Record<number, {bg: string; text: string}> = {
     [Orders.OrderStatuses.Placed]: {bg: '#FFF3CD', text: '#856404'},
     [Orders.OrderStatuses.Confirmed]: {bg: '#D1ECF1', text: '#0C5460'},
-    [Orders.OrderStatuses.Picked]: {bg: '#E7F3FF', text: '#004085'},
-    [Orders.OrderStatuses.Checked]: {bg: '#FFF4E6', text: '#856404'},
-    [Orders.OrderStatuses.Packed]: {bg: '#E8F5E9', text: '#2E7D32'},
     [Orders.OrderStatuses.Shipped]: {bg: '#D4EDDA', text: '#155724'},
     [Orders.OrderStatuses.OutForDelivery]: {bg: '#CCE5FF', text: '#004085'},
     [Orders.OrderStatuses.Delivered]: {bg: '#D1E7DD', text: '#0F5132'},

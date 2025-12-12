@@ -22,19 +22,20 @@ import {
 } from '../models/orders.model';
 
 export class OrdersService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = environment.baseurl;
+  // Get base URL directly from Redux store
+  private getBaseUrl(): string {
+    const store = require('../redux/store.redux').store;
+    const state = store.getState();
+    return state?.environment?.url || require('../utils/environment').environment.baseurl;
   }
 
   async getWithDetails(req: OrderGetWithDetailsReq): Promise<OrderGetWithDetailsRes[]> {
-    const response = await axios.post(`${this.baseUrl}/api/Orders/GetWithDetails`, req);
+    const response = await axios.post(`${this.getBaseUrl()}/api/Orders/GetWithDetails`, req);
     return response.data;
   }
 
   async adminPanelOrderSummary(req: OrderAdminPanelOrderSummaryReq): Promise<OrderAdminPanelOrderSummaryRes> {
-    const response = await axios.post(`${this.baseUrl}/api/Orders/AdminPanelOrderSummary`, req);
+    const response = await axios.post(`${this.getBaseUrl()}/api/Orders/AdminPanelOrderSummary`, req);
     return response.data;
   }
 
@@ -42,7 +43,7 @@ export class OrdersService {
     var postData: ActionReq<OrderAdminPanelOrderDetailsV3StatusReq> = new ActionReq<OrderAdminPanelOrderDetailsV3StatusReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<OrderAdminPanelOrderDetailsV3StatusRes>>(
-      `${this.baseUrl}/api/Orders/AdminPanelOrderDetailsV3Status`,
+      `${this.getBaseUrl()}/api/Orders/AdminPanelOrderDetailsV3Status`,
       postData
     );
     if (resp.data.item) {
@@ -52,7 +53,7 @@ export class OrdersService {
   }
 
   async moveToNextStatus(req: OrderMoveToNextStatusReq): Promise<any> {
-    const response = await axios.post(`${this.baseUrl}/api/Orders/MoveToNextStatus`, req);
+    const response = await axios.post(`${this.getBaseUrl()}/api/Orders/MoveToNextStatus`, req);
     return response.data;
   }
 
@@ -63,7 +64,7 @@ export class OrdersService {
       var postData: ActionReq<OrderForWeekReq> = new ActionReq<OrderForWeekReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<OrderForWeekRes>>>(
-        `${this.baseUrl}/api/Orders/getWeeklyOrders`,
+        `${this.getBaseUrl()}/api/Orders/getWeeklyOrders`,
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -79,7 +80,7 @@ export class OrdersService {
       var postData: ActionReq<OrderForWeekReq> = new ActionReq<OrderForWeekReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<OrdersForTodayRes>>>(
-        `${this.baseUrl}/api/Orders/getTodayOrders`,
+        `${this.getBaseUrl()}/api/Orders/getTodayOrders`,
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -95,7 +96,7 @@ export class OrdersService {
       var postData: ActionReq<OrderForWeekReq> = new ActionReq<OrderForWeekReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<OrdersForYearRes>>>(
-        `${this.baseUrl}/api/Orders/getYearOrders`,
+        `${this.getBaseUrl()}/api/Orders/getYearOrders`,
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -111,7 +112,7 @@ export class OrdersService {
       var postData: ActionReq<OrderForWeekReq> = new ActionReq<OrderForWeekReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<SaleByCategoryResDTO>>>(
-        `${this.baseUrl}/api/Orders/saleByCategory`,
+        `${this.getBaseUrl()}/api/Orders/saleByCategory`,
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -125,7 +126,7 @@ export class OrdersService {
     var result: Array<LatestOrderDTO> = [];
     try {
       var resp = await axios.get<ActionRes<Array<LatestOrderDTO>>>(
-        `${this.baseUrl}/api/Orders/getLatestOrders`
+        `${this.getBaseUrl()}/api/Orders/getLatestOrders`
       );
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
@@ -140,7 +141,7 @@ export class OrdersService {
       var postData: ActionReq<OrderForWeekReq> = new ActionReq<OrderForWeekReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<PopularOrdersRes>>>(
-        `${this.baseUrl}/api/Orders/getPopularOrders`,
+        `${this.getBaseUrl()}/api/Orders/getPopularOrders`,
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -156,7 +157,7 @@ export class OrdersService {
       var postData: ActionReq<OrdersGroupByVendorReq> = new ActionReq<OrdersGroupByVendorReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<OrdersGroupByVendorRes>>>(
-        `${this.baseUrl}/api/Orders/GetGroupedByVendor`,
+        `${this.getBaseUrl()}/api/Orders/GetGroupedByVendor`,
         postData
       );
       if (resp.data.item) result = resp.data.item;

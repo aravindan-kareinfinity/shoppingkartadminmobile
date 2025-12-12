@@ -19,14 +19,15 @@ import {
 } from '../models/ordershipmentgroup.model';
 
 export class OrderShipmentGroupService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = environment.baseurl;
+  // Get base URL directly from Redux store
+  private getBaseUrl(): string {
+    const store = require('../redux/store.redux').store;
+    const state = store.getState();
+    return state?.environment?.url || require('../utils/environment').environment.baseurl;
   }
 
   async createShipment(req: OrderShipmentGroupCreateShipmentReq): Promise<OrderShipmentGroupCreateShipmentRes> {
-    const response = await axios.post(`${this.baseUrl}/api/OrderShipmentGroup/CreateShipment`, req);
+    const response = await axios.post(`${this.getBaseUrl()}/api/OrderShipmentGroup/CreateShipment`, req);
     return response.data;
   }
 
@@ -36,7 +37,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupAdminPanelOrderDetailShipmentReq> = new ActionReq<OrderShipmentGroupAdminPanelOrderDetailShipmentReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<OrderShipmentGroupAdminPanelOrderDetailShipmentRes>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/AdminPanelOrderDetailShipment`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/AdminPanelOrderDetailShipment`,
       postData
     );
     if (resp.data.item) {
@@ -51,7 +52,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupInitiateShipmentForShiprocketReq> = new ActionReq<OrderShipmentGroupInitiateShipmentForShiprocketReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<any>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/InitiateShipmentForShiprocket`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/InitiateShipmentForShiprocket`,
       postData
     );
     if (resp.data.item) {
@@ -66,7 +67,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupCreateShiprocketOrderReq> = new ActionReq<OrderShipmentGroupCreateShiprocketOrderReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<OrderShipmentGroupCreateShiprocketOrderRes>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/CreateShiprocketOrder`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/CreateShiprocketOrder`,
       postData
     );
     if (resp.data.item) {
@@ -81,7 +82,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupCreateCustomOrderReq> = new ActionReq<OrderShipmentGroupCreateCustomOrderReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<OrderShipmentGroupCreateCustomOrderRes>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/CreateCustomOrder`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/CreateCustomOrder`,
       postData
     );
     if (resp.data.item) {
@@ -96,7 +97,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupRequestForShipmentPickupReq> = new ActionReq<OrderShipmentGroupRequestForShipmentPickupReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<any>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/RequestForShipmentPickup`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/RequestForShipmentPickup`,
       postData
     );
     if (resp.data.item) {
@@ -111,7 +112,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupCancelShiprocketShipmentReq> = new ActionReq<OrderShipmentGroupCancelShiprocketShipmentReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<any>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/CancelShiprocketShipment`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/CancelShiprocketShipment`,
       postData
     );
     if (resp.data.item) {
@@ -126,7 +127,7 @@ export class OrderShipmentGroupService {
     const postData: ActionReq<OrderShipmentGroupCancelShiprocketOrderReq> = new ActionReq<OrderShipmentGroupCancelShiprocketOrderReq>();
     postData.item = req;
     const resp = await axios.post<ActionRes<any>>(
-      `${this.baseUrl}/api/OrderShipmentGroup/CancelShiprocketOrder`,
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/CancelShiprocketOrder`,
       postData
     );
     if (resp.data.item) {

@@ -24,10 +24,12 @@ import {
 } from '../models/users.model';
 
 export class UsersService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = environment.baseurl + '/api/Users';
+  // Get base URL directly from Redux store
+  private getBaseUrl(): string {
+    const store = require('../redux/store.redux').store;
+    const state = store.getState();
+    const baseurl = state?.environment?.url || require('../utils/environment').environment.baseurl;
+    return baseurl + '/api/Users';
   }
 
   async select(req: UsersSelectReq): Promise<Array<Users>> {
@@ -36,7 +38,7 @@ export class UsersService {
       var postData: ActionReq<UsersSelectReq> = new ActionReq<UsersSelectReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Array<Users>>>(
-        this.baseUrl + '/Select',
+        this.getBaseUrl() + '/Select',
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -52,7 +54,7 @@ export class UsersService {
       var postData: ActionReq<Users> = new ActionReq<Users>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Users>>(
-        this.baseUrl + '/saveWithDetails',
+        this.getBaseUrl() + '/saveWithDetails',
         postData
       );
 
@@ -69,7 +71,7 @@ export class UsersService {
       var postData: ActionReq<Users> = new ActionReq<Users>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Users>>(
-        this.baseUrl + '/Insert',
+        this.getBaseUrl() + '/Insert',
         postData
       );
 
@@ -86,7 +88,7 @@ export class UsersService {
       var postData: ActionReq<Users> = new ActionReq<Users>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Users>>(
-        this.baseUrl + '/Signup',
+        this.getBaseUrl() + '/Signup',
         postData
       );
 
@@ -103,7 +105,7 @@ export class UsersService {
       var postData: ActionReq<Users> = new ActionReq<Users>();
       postData.item = req;
       var resp = await axios.post<ActionRes<Users>>(
-        this.baseUrl + '/Update',
+        this.getBaseUrl() + '/Update',
         postData
       );
       if (resp.data.item) result = resp.data.item;
@@ -119,7 +121,7 @@ export class UsersService {
       var postData: ActionReq<UsersDeleteReq> = new ActionReq<UsersDeleteReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<boolean>>(
-        this.baseUrl + '/Delete',
+        this.getBaseUrl() + '/Delete',
         postData
       );
 
@@ -135,10 +137,11 @@ export class UsersService {
     try {
       var postData: ActionReq<UsersGetOtpReq> = new ActionReq<UsersGetOtpReq>();
       postData.item = req;
-      console.log('UsersService.getOtp - baseUrl:', this.baseUrl);
+      const baseUrl = this.getBaseUrl();
+      console.log('UsersService.getOtp - baseUrl:', baseUrl);
       console.log('UsersService.getOtp - postData:', JSON.stringify(postData));
       var resp = await axios.post<ActionRes<number>>(
-        this.baseUrl + '/GetOtp',
+        baseUrl + '/GetOtp',
         postData
       );
       console.log('UsersService.getOtp - response:', JSON.stringify(resp.data));
@@ -158,7 +161,7 @@ export class UsersService {
         new ActionReq<UsersValidateOtpReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<UsersValidateOtpRes>>(
-        this.baseUrl + '/validateOtp',
+        this.getBaseUrl() + '/validateOtp',
         postData
       );
 
@@ -174,7 +177,7 @@ export class UsersService {
       new ActionReq<UserOrderConfirmReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderConfirm',
+      this.getBaseUrl() + '/OrderConfirm',
       postData
     );
 
@@ -186,7 +189,7 @@ export class UsersService {
       new ActionReq<UserOrderPickedReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderPicked',
+      this.getBaseUrl() + '/OrderPicked',
       postData
     );
 
@@ -198,7 +201,7 @@ export class UsersService {
       new ActionReq<UserOrderCheckedReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderChecked',
+      this.getBaseUrl() + '/OrderChecked',
       postData
     );
 
@@ -210,7 +213,7 @@ export class UsersService {
       new ActionReq<UserOrderPackedReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderPacked',
+      this.getBaseUrl() + '/OrderPacked',
       postData
     );
 
@@ -222,7 +225,7 @@ export class UsersService {
       new ActionReq<UserOrderRefundAndCancelReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderRefundAndCancel',
+      this.getBaseUrl() + '/OrderRefundAndCancel',
       postData
     );
 
@@ -234,7 +237,7 @@ export class UsersService {
       new ActionReq<UserOrderCloseReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderClose',
+      this.getBaseUrl() + '/OrderClose',
       postData
     );
 
@@ -246,7 +249,7 @@ export class UsersService {
       new ActionReq<UserOrderCancelReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderCancel',
+      this.getBaseUrl() + '/OrderCancel',
       postData
     );
 
@@ -262,7 +265,7 @@ export class UsersService {
     var resp = await axios.post<
       ActionRes<UserOrderShipmentGroupCreateShiprocketReturnOrderRes>
     >(
-      this.baseUrl + '/OrderShipmentGroupCreateShiprocketReturnOrder',
+      this.getBaseUrl() + '/OrderShipmentGroupCreateShiprocketReturnOrder',
       postData
     );
 
@@ -274,7 +277,7 @@ export class UsersService {
       new ActionReq<UserOrderReturnRefundReq>();
     postData.item = req;
     var resp = await axios.post<ActionRes<boolean>>(
-      this.baseUrl + '/OrderReturnRefund',
+      this.getBaseUrl() + '/OrderReturnRefund',
       postData
     );
 
@@ -288,7 +291,7 @@ export class UsersService {
         new ActionReq<UsersRefreshTokenReq>();
       postData.item = req;
       var resp = await axios.post<ActionRes<UsersRefreshTokenRes>>(
-        this.baseUrl + '/RefreshToken',
+        this.getBaseUrl() + '/RefreshToken',
         postData
       );
 

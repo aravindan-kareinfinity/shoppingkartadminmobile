@@ -16,6 +16,16 @@ export class AuthService {
 
   async getAuthToken(): Promise<string | null> {
     try {
+      // First, try to get auth token from Redux store
+      const store = require('../redux/store.redux').store;
+      const state = store.getState();
+      const tokenFromRedux = state?.usercontext?.value?.accesstoken;
+      
+      if (tokenFromRedux) {
+        return tokenFromRedux;
+      }
+      
+      // Fallback to AsyncStorage
       return await AsyncStorage.getItem(AUTH_TOKEN_KEY);
     } catch (error) {
       console.error('Error getting auth token:', error);
@@ -33,6 +43,16 @@ export class AuthService {
 
   async getRefreshToken(): Promise<string | null> {
     try {
+      // First, try to get refresh token from Redux store
+      const store = require('../redux/store.redux').store;
+      const state = store.getState();
+      const refreshTokenFromRedux = state?.usercontext?.value?.refreshtoken;
+      
+      if (refreshTokenFromRedux) {
+        return refreshTokenFromRedux;
+      }
+      
+      // Fallback to AsyncStorage
       return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
     } catch (error) {
       console.error('Error getting refresh token:', error);
@@ -87,11 +107,25 @@ export class AuthService {
       refreshtoken: refreshToken,
     });
 
-    // Update tokens
+    // Update tokens in both AsyncStorage and Redux
     await this.setAuthToken(response.accesstoken);
     if (response.refreshtoken) {
       await this.setRefreshToken(response.refreshtoken);
     }
+    
+    // Update Redux store with new tokens (always update, even if no new refresh token)
+    const store = require('../redux/store.redux').store;
+    const {usercontextactions} = require('../redux/usercontext.redux');
+    const rootState = store.getState().usercontext;
+    
+    // Update Redux with new tokens while keeping existing user
+    store.dispatch(
+      usercontextactions.setFromValidateOtp({
+        user: rootState.value.user,
+        accesstoken: response.accesstoken,
+        refreshtoken: response.refreshtoken || rootState.value.refreshtoken,
+      })
+    );
 
     return response.accesstoken;
   }

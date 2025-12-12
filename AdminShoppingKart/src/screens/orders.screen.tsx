@@ -29,6 +29,7 @@ import {FormInput} from '../components/forminput.component';
 import {formatPrice} from '../utils/format.utils';
 import {formatDateGB} from '../utils/date.utils';
 import moment from 'moment';
+import {DatePickerComponent} from '../components/datepicker.component';
 
 type OrdersScreenNavigationProp = BottomTabNavigationProp<HomeTabParamList>;
 
@@ -45,7 +46,10 @@ export function OrdersScreen() {
   // Filter states
   const [filterFromDate, setFilterFromDate] = useState<Date | null>(null);
   const [filterToDate, setFilterToDate] = useState<Date | null>(null);
-  const [filterVendorId, setFilterVendorId] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<number | null>(null); // null = All, specific status value = filter by status
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
+  const [showFromDatePicker, setShowFromDatePicker] = useState(false);
+  const [showToDatePicker, setShowToDatePicker] = useState(false);
 
   const ordersService = useRef(new OrdersService()).current;
 
@@ -84,14 +88,30 @@ export function OrdersScreen() {
       });
     }
 
-    // Vendor ID filter
-    if (filterVendorId.trim()) {
-      // Note: vendorid is not in the response, so this would need to be added to the API response
-      // For now, we'll skip this filter
+    // Status filter - filter groups that contain orders with the selected status
+    if (filterStatus !== null || showPendingOnly) {
+      filtered = filtered.filter(group => {
+        if (!group.design_status_list || group.design_status_list.length === 0) {
+          return false;
+        }
+        
+        if (showPendingOnly) {
+          // Show groups that have at least one order with pending status (Placed, Confirmed, Picked, Checked, Packed)
+          return group.design_status_list.some(design => 
+            design.status === Orders.OrderStatuses.Placed ||
+            design.status === Orders.OrderStatuses.Confirmed
+          );
+        } else if (filterStatus !== null) {
+          // Show groups that have at least one order with the selected status
+          return group.design_status_list.some(design => design.status === filterStatus);
+        }
+        
+        return true;
+      });
     }
 
     setFilteredOrdersList(filtered);
-  }, [groupedOrdersList, searchText, filterFromDate, filterToDate, filterVendorId]);
+  }, [groupedOrdersList, searchText, filterFromDate, filterToDate, filterStatus, showPendingOnly]);
 
   const getGroupedData = async () => {
     setIsLoading(true);
@@ -119,13 +139,14 @@ export function OrdersScreen() {
   const handleClearFilters = () => {
     setFilterFromDate(null);
     setFilterToDate(null);
-    setFilterVendorId('');
+    setFilterStatus(null);
+    setShowPendingOnly(false);
     setSearchText('');
     setShowFilterSheet(false);
     getGroupedData();
   };
 
-  const hasActiveFilters = filterFromDate || filterToDate || filterVendorId.trim() || searchText.trim();
+  const hasActiveFilters = filterFromDate || filterToDate || searchText.trim() || filterStatus !== null || showPendingOnly;
 
   const getData = async () => {
     setIsLoading(true);
@@ -185,6 +206,11 @@ export function OrdersScreen() {
               {item.groupid}
             </Text>
           </View>
+          {item.createdon && (
+            <Text style={[$.h6, {color: Colors.textSecondary}]}>
+              {formatDateGB(item.createdon)}
+            </Text>
+          )}
         </View>
 
         <View style={styles.orderContent}>
@@ -196,17 +222,6 @@ export function OrdersScreen() {
               {totalQty}
             </Text>
           </View>
-
-          {item.createdon && (
-            <View style={styles.orderRow}>
-              <Text style={[$.h6, {color: Colors.textSecondary, width: 100}]}>
-                Created On:
-              </Text>
-            <Text style={[$.h6, {color: Colors.text}, $.flex_1]}>
-              {formatDateGB(item.createdon)}
-              </Text>
-            </View>
-          )}
         </View>
       </TouchableOpacity>
     );
@@ -360,36 +375,6 @@ export function OrdersScreen() {
                 size={24} 
               />
             </TouchableOpacity>
-            <View style={styles.filterButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
-                  getall && styles.filterButtonActive,
-                ]}
-                onPress={() => setGetall(true)}>
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    getall && styles.filterButtonTextActive,
-                  ]}>
-                  All
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
-                  !getall && styles.filterButtonActive,
-                ]}
-                onPress={() => setGetall(false)}>
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    !getall && styles.filterButtonTextActive,
-                  ]}>
-                  Pending
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
 
@@ -451,71 +436,150 @@ export function OrdersScreen() {
               Filter Orders
             </Text>
 
-            {/* From Date */}
-            <View style={$.mb_4}>
+            {/* Date Range - Single Row */}
+            <View style={[$.mb_4]}>
               <Text style={[$.h6, {color: Colors.textSecondary}, $.mb_2]}>
-                From Date (YYYY-MM-DD)
+                Date Range
               </Text>
-              <FormInput
-                placeholder="e.g., 2024-01-01"
-                value={filterFromDate ? moment(filterFromDate).format('YYYY-MM-DD') : ''}
-                onChangeText={(text) => {
-                  const date = moment(text, 'YYYY-MM-DD', true);
-                  if (date.isValid()) {
-                    setFilterFromDate(date.toDate());
-                  } else if (text === '') {
-                    setFilterFromDate(null);
-                  }
-                }}
-                keyboardType="default"
-              />
-              {filterFromDate && (
-                <TouchableOpacity
-                  style={styles.clearFilterButton}
-                  onPress={() => setFilterFromDate(null)}>
-                  <Text style={[$.h6, {color: Colors.error}]}>Clear</Text>
-                </TouchableOpacity>
-              )}
+              <View style={styles.dateRow}>
+                <View style={styles.dateField}>
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowFromDatePicker(true)}>
+                    <Text style={[$.h6, {color: filterFromDate ? Colors.text : Colors.textSecondary}]}>
+                      {filterFromDate ? formatDateGB(filterFromDate.toISOString()) : 'From Date'}
+                    </Text>
+                  </TouchableOpacity>
+                  {filterFromDate && (
+                    <TouchableOpacity
+                      style={styles.clearFilterButton}
+                      onPress={() => setFilterFromDate(null)}>
+                      <Text style={[$.h7, {color: Colors.error}]}>Clear</Text>
+                    </TouchableOpacity>
+                  )}
+                  <DatePickerComponent
+                    date={filterFromDate || new Date()}
+                    show={showFromDatePicker}
+                    mode="date"
+                    setShow={setShowFromDatePicker}
+                    setDate={(date) => {
+                      setFilterFromDate(date);
+                      setShowFromDatePicker(false);
+                    }}
+                    disablePrevious={false}
+                  />
+                </View>
+                <View style={styles.dateField}>
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowToDatePicker(true)}>
+                    <Text style={[$.h6, {color: filterToDate ? Colors.text : Colors.textSecondary}]}>
+                      {filterToDate ? formatDateGB(filterToDate.toISOString()) : 'To Date'}
+                    </Text>
+                  </TouchableOpacity>
+                  {filterToDate && (
+                    <TouchableOpacity
+                      style={styles.clearFilterButton}
+                      onPress={() => setFilterToDate(null)}>
+                      <Text style={[$.h7, {color: Colors.error}]}>Clear</Text>
+                    </TouchableOpacity>
+                  )}
+                  <DatePickerComponent
+                    date={filterToDate || new Date()}
+                    show={showToDatePicker}
+                    mode="date"
+                    setShow={setShowToDatePicker}
+                    setDate={(date) => {
+                      setFilterToDate(date);
+                      setShowToDatePicker(false);
+                    }}
+                    disablePrevious={false}
+                  />
+                </View>
+              </View>
             </View>
 
-            {/* To Date */}
+            {/* Status Filter */}
             <View style={$.mb_4}>
               <Text style={[$.h6, {color: Colors.textSecondary}, $.mb_2]}>
-                To Date (YYYY-MM-DD)
+                Order Status
               </Text>
-              <FormInput
-                placeholder="e.g., 2024-12-31"
-                value={filterToDate ? moment(filterToDate).format('YYYY-MM-DD') : ''}
-                onChangeText={(text) => {
-                  const date = moment(text, 'YYYY-MM-DD', true);
-                  if (date.isValid()) {
-                    setFilterToDate(date.toDate());
-                  } else if (text === '') {
-                    setFilterToDate(null);
-                  }
-                }}
-                keyboardType="default"
-              />
-              {filterToDate && (
+              
+              {/* All / Pending Toggle */}
+              <View style={[styles.statusToggleContainer, $.mb_3]}>
                 <TouchableOpacity
-                  style={styles.clearFilterButton}
-                  onPress={() => setFilterToDate(null)}>
-                  <Text style={[$.h6, {color: Colors.error}]}>Clear</Text>
+                  style={[
+                    styles.statusToggleButton,
+                    !showPendingOnly && filterStatus === null && styles.statusToggleButtonActive,
+                  ]}
+                  onPress={() => {
+                    setShowPendingOnly(false);
+                    setFilterStatus(null);
+                  }}>
+                  <Text
+                    style={[
+                      styles.statusToggleText,
+                      !showPendingOnly && filterStatus === null && styles.statusToggleTextActive,
+                    ]}>
+                    All
+                  </Text>
                 </TouchableOpacity>
-              )}
-            </View>
+                <TouchableOpacity
+                  style={[
+                    styles.statusToggleButton,
+                    showPendingOnly && styles.statusToggleButtonActive,
+                  ]}
+                  onPress={() => {
+                    setShowPendingOnly(true);
+                    setFilterStatus(null);
+                  }}>
+                  <Text
+                    style={[
+                      styles.statusToggleText,
+                      showPendingOnly && styles.statusToggleTextActive,
+                    ]}>
+                    Pending
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-            {/* Vendor ID */}
-            <View style={$.mb_4}>
-              <Text style={[$.h6, {color: Colors.textSecondary}, $.mb_2]}>
-                Vendor ID (Optional)
-              </Text>
-              <FormInput
-                placeholder="Enter vendor ID"
-                value={filterVendorId}
-                onChangeText={setFilterVendorId}
-                keyboardType="numeric"
-              />
+              {/* Individual Status Options */}
+              <View style={styles.statusOptionsContainer}>
+                <Text style={[$.h7, {color: Colors.textSecondary}, $.mb_2]}>
+                  Filter by Status:
+                </Text>
+                <View style={styles.statusOptionsGrid}>
+                  {[
+                    {label: 'Placed', value: Orders.OrderStatuses.Placed},
+                    {label: 'Confirmed', value: Orders.OrderStatuses.Confirmed},
+                    {label: 'Shipped', value: Orders.OrderStatuses.Shipped},
+                  ].map((statusOption) => (
+                    <TouchableOpacity
+                      key={statusOption.value}
+                      style={[
+                        styles.statusOptionButton,
+                        filterStatus === statusOption.value && styles.statusOptionButtonActive,
+                      ]}
+                      onPress={() => {
+                        if (filterStatus === statusOption.value) {
+                          setFilterStatus(null);
+                          setShowPendingOnly(false);
+                        } else {
+                          setFilterStatus(statusOption.value);
+                          setShowPendingOnly(false);
+                        }
+                      }}>
+                      <Text
+                        style={[
+                          styles.statusOptionText,
+                          filterStatus === statusOption.value && styles.statusOptionTextActive,
+                        ]}>
+                        {statusOption.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             </View>
 
             {/* Action Buttons */}
@@ -542,157 +606,221 @@ export function OrdersScreen() {
   );
 }
 
+// Using global styles - spacer = 8, so:
+// 4 = spacer * 0.5, 8 = spacer, 12 = spacer * 1.5, 16 = spacer * 2
+const spacer = 8;
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderBottomWidth: 1,
+    ...$.flex_row,
+    ...$.justify_content_spaceBetween,
+    ...$.align_items_center,
+    ...$.bg_background,
+    ...$.border_bottom,
     borderBottomColor: Colors.divider,
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    ...$.flex_row,
+    ...$.align_items_center,
+    gap: spacer * 1.5, // 12
   },
-  loader: {
-    marginRight: 8,
-  },
+  loader: $.mr_2,
   filterButtons: {
-    flexDirection: 'row',
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 8,
+    ...$.flex_row,
+    ...$.bg_inputbg,
+    ...$.border_rounded_1,
     padding: 2,
-    gap: 4,
+    gap: spacer * 0.5, // 4
   },
   filterButton: {
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    ...$.px_3,
     borderRadius: 6,
   },
-  filterButtonActive: {
-    backgroundColor: Colors.primary,
-  },
+  filterButtonActive: $.bg_primary,
   filterButtonText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
+    ...$.h6,
+    ...$.text_muted,
+    ...$.font_weight_500,
   },
   filterButtonTextActive: {
     color: Colors.background,
-    fontWeight: '600',
+    ...$.font_weight_600,
   },
   listContainer: {
-    padding: 12,
-    gap: 12,
+    ...$.p_3,
+    gap: spacer * 1.5, // 12
   },
   orderCard: {
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
+    ...$.bg_inputbg,
+    ...$.border_rounded_2,
+    ...$.p_4,
+    marginBottom: 0,
+    ...$.border,
     borderColor: Colors.divider,
   },
   orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
+    ...$.flex_row,
+    ...$.justify_content_spaceBetween,
+    ...$.align_items_center,
+    ...$.mb_3,
+    ...$.pb_3,
+    ...$.border_bottom,
     borderBottomColor: Colors.divider,
   },
   orderIdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+    ...$.flex_row,
+    ...$.align_items_center,
+    ...$.flex_1,
   },
   returnBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    ...$.bg_primary,
+    ...$.px_2,
+    ...$.py_1,
+    ...$.border_rounded,
   },
-  orderContent: {
-    gap: 8,
-  },
+  orderContent: $.gap_2,
   orderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
+    ...$.flex_row,
+    ...$.align_items_center,
+    ...$.mb_1,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
+    ...$.px_2,
+    ...$.py_1,
+    ...$.border_rounded,
+    ...$.align_self_start,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    ...$.flex_row,
+    ...$.align_items_center,
+    ...$.bg_inputbg,
+    ...$.border_rounded_1,
+    ...$.px_3,
     height: 44,
-    borderWidth: 1,
+    ...$.border,
     borderColor: Colors.divider,
   },
   searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 16,
+    ...$.flex_1,
+    ...$.ml_2,
+    ...$.h5,
     color: Colors.text,
   },
   clearSearchButton: {
-    padding: 4,
-    marginLeft: 8,
+    ...$.p_1,
+    ...$.ml_2,
   },
   clearText: {
-    fontSize: 18,
-    color: Colors.textSecondary,
+    ...$.h4,
+    ...$.text_muted,
   },
   filterIconButton: {
-    padding: 8,
-    marginRight: 8,
-    borderRadius: 8,
+    ...$.p_2,
+    ...$.mr_2,
+    ...$.border_rounded_1,
   },
-  filterIconButtonActive: {
-    backgroundColor: Colors.inputBackground,
-  },
-  filterSheetContent: {
-    flex: 1,
-  },
+  filterIconButtonActive: $.bg_inputbg,
+  filterSheetContent: $.flex_1,
   clearFilterButton: {
-    marginTop: 4,
-    alignSelf: 'flex-start',
+    ...$.mt_1,
+    ...$.align_self_start,
+  },
+  dateRow: {
+    ...$.flex_row,
+    gap: spacer * 1.5, // 12
+  },
+  dateField: $.flex_1,
+  datePickerButton: {
+    ...$.border,
+    ...$.border_rounded_1,
+    ...$.px_3,
+    ...$.py_2,
+    borderColor: Colors.divider,
+    backgroundColor: Colors.inputBackground,
+    minHeight: 44,
+    ...$.justify_content_center,
   },
   filterActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    ...$.flex_row,
+    gap: spacer * 1.5, // 12
+    ...$.mt_4,
   },
   filterActionButton: {
-    flex: 1,
+    ...$.flex_1,
     paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...$.border_rounded_1,
+    ...$.align_items_center,
+    ...$.justify_content_center,
   },
   clearButton: {
-    backgroundColor: Colors.inputBackground,
-    borderWidth: 1,
+    ...$.bg_inputbg,
+    ...$.border,
     borderColor: Colors.divider,
   },
   applyButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.textSecondary,
   },
   clearFiltersButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: Colors.inputBackground,
+    ...$.py_2,
+    ...$.px_4,
+    ...$.border_rounded_1,
+    ...$.bg_inputbg,
+  },
+  statusToggleContainer: {
+    ...$.flex_row,
+    ...$.bg_inputbg,
+    ...$.border_rounded_1,
+    padding: 2,
+    gap: spacer * 0.5, // 4
+  },
+  statusToggleButton: {
+    ...$.flex_1,
+    ...$.py_2,
+    ...$.px_3,
+    borderRadius: 6,
+    ...$.align_items_center,
+  },
+  statusToggleButtonActive: {
+    backgroundColor: Colors.textSecondary,
+  },
+  statusToggleText: {
+    ...$.h6,
+    ...$.text_muted,
+    ...$.font_weight_500,
+  },
+  statusToggleTextActive: {
+    color: Colors.background,
+    ...$.font_weight_600,
+  },
+  statusOptionsContainer: $.mt_2,
+  statusOptionsGrid: {
+    ...$.flex_row,
+    ...$.flex_wrap_wrap,
+    ...$.gap_2,
+  },
+  statusOptionButton: {
+    ...$.py_2,
+    ...$.px_3,
+    ...$.border_rounded_1,
+    ...$.bg_inputbg,
+    ...$.border,
+    borderColor: Colors.divider,
+    minWidth: 80,
+    ...$.align_items_center,
+  },
+  statusOptionButtonActive: {
+    backgroundColor: Colors.textSecondary,
+    borderColor: Colors.textSecondary,
+    borderWidth: 2,
+  },
+  statusOptionText: {
+    ...$.h7,
+    color: Colors.text,
+    ...$.font_weight_500,
+  },
+  statusOptionTextActive: {
+    color: Colors.background,
+    ...$.font_weight_600,
   },
 });
 

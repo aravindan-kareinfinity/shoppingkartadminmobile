@@ -6,14 +6,15 @@ import {
 } from '../models/skubarcodemap.model';
 
 export class SkuBarcodeMapService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = environment.baseurl;
+  // Get base URL directly from Redux store
+  private getBaseUrl(): string {
+    const store = require('../redux/store.redux').store;
+    const state = store.getState();
+    return state?.environment?.url || require('../utils/environment').environment.baseurl;
   }
 
   async searchByBarcode(barcode: string): Promise<SkuBarcodeMap[]> {
-    const response = await axios.post(`${this.baseUrl}/api/SkuBarcodeMap/SearchByBarcode`, {barcode});
+    const response = await axios.post(`${this.getBaseUrl()}/api/SkuBarcodeMap/SearchByBarcode`, {barcode});
     return response.data;
   }
 }
