@@ -180,9 +180,15 @@ export interface OrderGetWithDetailsReq {
   getall?: boolean;
   skuid?: number;
   orderid?: number;
+  vendorid?: number;
+  fromdate?: Date;
+  todate?: Date;
+  status?: number;
 }
 
 export interface OrderGetWithDetailsRes {
+  displayid:string;
+  productname:string;
   id: number;
   groupid?: number;
   designcode?: string;
@@ -196,6 +202,28 @@ export interface OrderGetWithDetailsRes {
   customername?: string;
   skudesignattributestring?: string;
   createdon: string;
+}
+
+export interface OrderGroupGetWithDetailsRes {
+  groupid: number;
+  orderdate: string;
+  customername: string;
+  mobilenumber: string;
+  totalquantity: number;
+  totalamount: number;
+  totalorders: number;
+  product_quantities: string;
+  sku_quantities: string;
+  total_shipments: number;
+  shipments: ShipmentData[];
+  // Legacy fields for backward compatibility (computed from shipments on server)
+  shipment_statuses?: string;
+  shipmentgroupids?: string;
+}
+
+export interface ShipmentData {
+  id: number;
+  status: number;
 }
 
 export interface OrderAdminPanelOrderSummaryReq {
@@ -340,4 +368,48 @@ export interface OrderGroupAdminPanelOrderSummaryV3Res {
     ordercount: number;
   }>;
   cancreateshipment: boolean;
+}
+
+export interface OrderGetCustomerSummaryReq {
+  getall?: boolean;
+  vendorid?: number;
+  fromdate?: Date;
+  todate?: Date;
+  status?: number;
+  pendingonly?: boolean;
+}
+
+export interface OrderGetCustomerSummaryRes {
+  customerid: number;
+  customername: string;
+  customermobilenumber: string;
+  customeremail: string;
+  totalorders: number;
+  totalquantity: number;
+  totalsaleprice: number;
+  totaldiscount: number;
+  totalnetprice: number;
+  lastorderdate: string;
+}
+
+export interface GetWithDetailCustomerReq {
+  getall?: boolean;
+  vendorid?: number;
+  fromdate?: Date;
+  todate?: Date;
+  status?: number;
+  pendingonly?: boolean;
+}
+
+export interface GetWithDetailCustomerRes {
+  customerid: number;
+  customername: string;
+  customermobilenumber: string;
+  customeremail: string;
+  totalorders: number;
+  totalquantity: number;
+  totalsaleprice: number;
+  totaldiscount: number;
+  totalnetprice: number;
+  lastorderdate: string;
 }

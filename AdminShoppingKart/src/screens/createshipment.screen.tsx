@@ -7,6 +7,9 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRoute, useNavigation, RouteProp} from '@react-navigation/native';
@@ -26,7 +29,6 @@ import {
 } from '../models/ordershipmentgroup.model';
 import {formatPrice} from '../utils/format.utils';
 import {formatDateTime} from '../utils/date.utils';
-import {Image} from 'react-native';
 import {environment} from '../utils/environment';
 import {useAppSelector} from '../redux/hooks.redux';
 import {selectenvironment} from '../redux/environment.redux';
@@ -40,6 +42,9 @@ export function CreateShipmentScreen() {
   const environmentState = useAppSelector(selectenvironment);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPicking, setIsPicking] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+  const [isPacking, setIsPacking] = useState(false);
 
   const ordergroupid = route.params?.ordergroupid || 0;
   const ordershipmentgroupid = route.params?.ordershipmentgroupid || 0;
@@ -208,6 +213,15 @@ export function CreateShipmentScreen() {
   };
 
   const handleRequestPickup = async () => {
+    // Local guard: if pickup already scheduled (server has flagged it), don't call API again
+    if (
+      shipmentData?.ordershipmentgroup &&
+      shipmentData.ordershipmentgroup.shiprocketpickupscheduleddate
+    ) {
+      Alert.alert('Info', 'Pickup has already been requested for this shipment.');
+      return;
+    }
+
     if (!selectedCourierId || selectedCourierId <= 0) {
       Alert.alert('Error', 'Please select a courier');
       return;
@@ -235,7 +249,15 @@ export function CreateShipmentScreen() {
       ]);
     } catch (error: any) {
       console.error('Error requesting pickup:', error);
-      Alert.alert('Error', error?.message || 'Failed to request pickup');
+      const apiError = error?.response?.data;
+      const key = apiError?.key || apiError?.Key;
+      const message = apiError?.message || apiError?.Message || error?.message;
+
+      if (key === 'ShipmentPickupAlreadyRequested') {
+        Alert.alert('Info', 'Pickup has already been requested for this shipment.');
+      } else {
+        Alert.alert('Error', message || 'Failed to request pickup');
+      }
     } finally {
       setIsRequestingPickup(false);
     }
@@ -329,6 +351,87 @@ export function CreateShipmentScreen() {
     );
   };
 
+  const handleItemPicked = async () => {
+    if (!ordershipmentgroupid || ordershipmentgroupid <= 0) {
+      Alert.alert('Error', 'Invalid shipment group ID');
+      return;
+    }
+    try {
+      setIsPicking(true);
+      await orderShipmentGroupService.itemPicked({
+        ordershipmentgroupid,
+        notes: '',
+      });
+      Alert.alert('Success', 'Items marked as picked', [
+        {
+          text: 'OK',
+          onPress: () => {
+            loadShipmentData();
+          },
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Error marking items as picked:', error);
+      Alert.alert('Error', error?.message || 'Failed to update picked status');
+    } finally {
+      setIsPicking(false);
+    }
+  };
+
+  const handleItemChecked = async () => {
+    if (!ordershipmentgroupid || ordershipmentgroupid <= 0) {
+      Alert.alert('Error', 'Invalid shipment group ID');
+      return;
+    }
+    try {
+      setIsChecking(true);
+      await orderShipmentGroupService.itemChecked({
+        ordershipmentgroupid,
+        notes: '',
+      });
+      Alert.alert('Success', 'Items marked as checked', [
+        {
+          text: 'OK',
+          onPress: () => {
+            loadShipmentData();
+          },
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Error marking items as checked:', error);
+      Alert.alert('Error', error?.message || 'Failed to update checked status');
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleItemPacked = async () => {
+    if (!ordershipmentgroupid || ordershipmentgroupid <= 0) {
+      Alert.alert('Error', 'Invalid shipment group ID');
+      return;
+    }
+    try {
+      setIsPacking(true);
+      await orderShipmentGroupService.itemPacked({
+        ordershipmentgroupid,
+        notes: '',
+      });
+      Alert.alert('Success', 'Items marked as packed', [
+        {
+          text: 'OK',
+          onPress: () => {
+            loadShipmentData();
+          },
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Error marking items as packed:', error);
+      Alert.alert('Error', error?.message || 'Failed to update packed status');
+    } finally {
+      setIsPacking(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
@@ -356,9 +459,16 @@ export function CreateShipmentScreen() {
 
   return (
     <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
-      <ScrollView style={[$.flex_1, $.px_4, $.py_3]}>
-        <View style={[$.mb_3]}>
-          <Text style={[$.h4, $.font_weight_bold, {color: Colors.text}, $.mb_1]}>
+      <KeyboardAvoidingView
+        style={$.flex_1}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+      <ScrollView
+        style={[$.flex_1, $.px_3, $.py_2]}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[$.pb_4]}>
+        <View style={[$.mb_2]}>
+          <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, {marginBottom: 2}]}>
             {ordershipmentgroupid > 0 ? 'Update Shipment' : 'Create Shipment'}
           </Text>
           <Text style={[$.h7, {color: Colors.textSecondary}]}>
@@ -367,19 +477,19 @@ export function CreateShipmentScreen() {
         </View>
 
         {/* Partner Selection */}
-        <View style={[$.mb_3]}>
-          <Text style={[$.h6, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+        <View style={[$.mb_2]}>
+          <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
             Partner
           </Text>
           {ordershipmentgroupid > 0 ? (
-            <View style={[styles.partnerSelector, $.mb_2, {opacity: 0.6}]}>
+            <View style={[styles.partnerSelector, {marginBottom: 8, opacity: 0.6}]}>
               <Text style={[$.h6, {color: Colors.text, flex: 1}]}>
                 {shipmentData.partnerlist.find(p => p.value === selectedPartner)?.label || 'Select Partner'}
               </Text>
             </View>
           ) : (
             <TouchableOpacity
-              style={[styles.partnerSelector, $.mb_2]}
+              style={[styles.partnerSelector, {marginBottom: 8}]}
               onPress={() => setShowPartnerSheet(true)}>
               <Text style={[$.h6, {color: Colors.text, flex: 1}]}>
                 {shipmentData.partnerlist.find(p => p.value === selectedPartner)?.label || 'Select Partner'}
@@ -391,7 +501,7 @@ export function CreateShipmentScreen() {
 
         {/* Custom Partner Name - Only show for Custom partner */}
         {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Custom && (
-          <View style={[$.mb_3]}>
+          <View style={[$.mb_2]}>
           <FormInput
               label="Custom Partner Name"
               value={customPartnerName}
@@ -404,8 +514,8 @@ export function CreateShipmentScreen() {
 
         {/* Pickup Location - Only show for Shiprocket */}
         {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket && (
-          <View style={[$.mb_3]}>
-          <Text style={[$.h6, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+          <View style={[$.mb_2]}>
+          <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
             Pickup Location
           </Text>
           {shipmentData.shiprocketpickuplocationlist.length > 0 ? (
@@ -416,11 +526,10 @@ export function CreateShipmentScreen() {
                   style={[
                     styles.locationItem,
                     pickupLocation === location.locationname && styles.locationItemSelected,
-                    $.mb_2,
-                    {opacity: 0.6},
+                    {marginBottom: 6, opacity: 0.6},
                   ]}>
-                  <Text style={[$.h6, {color: Colors.text}]}>{location.locationname}</Text>
-                  <Text style={[$.h7, {color: Colors.textSecondary}]}>Pincode: {location.pincode}</Text>
+                  <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>{location.locationname}</Text>
+                  <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>Pincode: {location.pincode}</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -428,14 +537,14 @@ export function CreateShipmentScreen() {
                   style={[
                     styles.locationItem,
                     pickupLocation === location.locationname && styles.locationItemSelected,
-                    $.mb_2,
+                    {marginBottom: 6},
                   ]}
                   onPress={() => {
                     setPickupLocation(location.locationname);
                     setPickupLocationPincode(location.pincode);
                   }}>
-                  <Text style={[$.h6, {color: Colors.text}]}>{location.locationname}</Text>
-                  <Text style={[$.h7, {color: Colors.textSecondary}]}>Pincode: {location.pincode}</Text>
+                  <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>{location.locationname}</Text>
+                  <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>Pincode: {location.pincode}</Text>
                 </TouchableOpacity>
               )
             ))
@@ -446,8 +555,8 @@ export function CreateShipmentScreen() {
         )}
 
         {/* Orders Selection */}
-        <View style={[$.mb_3]}>
-          <Text style={[$.h6, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+        <View style={[$.mb_2]}>
+          <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
             Orders ({selectedOrders.length} selected)
           </Text>
           {ordersToShow.map((order) => {
@@ -455,7 +564,7 @@ export function CreateShipmentScreen() {
               return (
                 <View
                   key={order.orderid}
-                  style={[styles.orderItem, $.mb_2, {opacity: 0.6}]}>
+                  style={[styles.orderItem, {marginBottom: 6, opacity: 0.6}]}>
                   <View style={styles.orderItemContent}>
                     <View style={styles.checkbox}>
                       {selectedOrders.includes(order.orderid) && (
@@ -470,15 +579,15 @@ export function CreateShipmentScreen() {
                       />
                     )}
                     <View style={styles.orderDetails}>
-                      <Text style={[$.h6, $.font_weight_600, {color: Colors.text}]}>
+                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
                         Order #{order.orderid}
                       </Text>
                       {order.designcode && (
-                        <Text style={[$.h6, {color: Colors.textSecondary}]}>
-                          Design: {order.designcode}
+                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]} numberOfLines={1}>
+                          {order.designcode}
                         </Text>
                       )}
-                      <Text style={[$.h6, {color: Colors.textSecondary}]}>
+                      <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]}>
                         Qty: {order.orderquantity} | {formatPrice(order.ordernetprice)}
                       </Text>
                     </View>
@@ -489,7 +598,7 @@ export function CreateShipmentScreen() {
               return (
                 <TouchableOpacity
                   key={order.orderid}
-                  style={[styles.orderItem, $.mb_2]}
+                  style={[styles.orderItem, {marginBottom: 6}]}
                   onPress={() => toggleOrderSelection(order.orderid)}>
                   <View style={styles.orderItemContent}>
                     <View style={styles.checkbox}>
@@ -505,15 +614,15 @@ export function CreateShipmentScreen() {
                       />
                     )}
                     <View style={styles.orderDetails}>
-                      <Text style={[$.h6, $.font_weight_600, {color: Colors.text}]}>
+                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
                         Order #{order.orderid}
                       </Text>
                       {order.designcode && (
-                        <Text style={[$.h6, {color: Colors.textSecondary}]}>
-                          Design: {order.designcode}
+                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]} numberOfLines={1}>
+                          {order.designcode}
                         </Text>
                       )}
-                      <Text style={[$.h6, {color: Colors.textSecondary}]}>
+                      <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]}>
                         Qty: {order.orderquantity} | {formatPrice(order.ordernetprice)}
                       </Text>
                     </View>
@@ -526,8 +635,8 @@ export function CreateShipmentScreen() {
 
         {/* Package Details - Only show for Shiprocket */}
         {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket && (
-          <View style={[$.mb_3]}>
-            <Text style={[$.h6, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+          <View style={[$.mb_2]}>
+            <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
               Package Details
             </Text>
           <View style={styles.packageRow}>
@@ -582,8 +691,8 @@ export function CreateShipmentScreen() {
          ordershipmentgroupid > 0 &&
          shipmentData.shiprocketavailablecouriercompanylist &&
          shipmentData.shiprocketavailablecouriercompanylist.length > 0 && (
-          <View style={[$.mb_3]}>
-            <Text style={[$.h6, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+          <View style={[$.mb_2]}>
+            <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
               Available Couriers
             </Text>
             {shipmentData.shiprocketavailablecouriercompanylist.map((courier, index) => (
@@ -592,7 +701,7 @@ export function CreateShipmentScreen() {
                 style={[
                   styles.courierItem,
                   selectedCourierId === courier.courier_company_id && styles.courierItemSelected,
-                  $.mb_2,
+                  {marginBottom: 6},
                 ]}
                 onPress={() => setSelectedCourierId(courier.courier_company_id)}>
                 <View style={styles.courierContent}>
@@ -627,42 +736,106 @@ export function CreateShipmentScreen() {
           </View>
         )}
 
-        {/* Create/Update Button - Only show if shipment doesn't exist or can be updated */}
+        {/* Create/Update Button - Only show if shipment doesn't exist */}
         {ordershipmentgroupid === 0 && (
           <TouchableOpacity
             style={[
               styles.createButton,
               {backgroundColor: ColorPalette.primary},
-              $.mb_3,
+              $.mb_2,
             ]}
             onPress={handleCreateShipment}
             disabled={isSubmitting}>
             {isSubmitting ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
                 Create Shipment
               </Text>
             )}
           </TouchableOpacity>
         )}
 
-        {/* Request Pickup Button - Only show for Shiprocket with OrderCreated status */}
+        {/* Item lifecycle buttons: Picked -> Checked -> Packed */}
         {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket &&
          ordershipmentgroupid > 0 &&
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.OrderCreated && (
           <TouchableOpacity
             style={[
               styles.actionButton,
+              {backgroundColor: ColorPalette.secondaryDark},
+              {marginBottom: 8},
+            ]}
+            onPress={handleItemPicked}
+            disabled={isPicking}>
+            {isPicking ? (
+              <ActivityIndicator size="small" color={Colors.background} />
+            ) : (
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+                Mark as Picked
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket &&
+         ordershipmentgroupid > 0 &&
+         shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemPicked && (
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {backgroundColor: ColorPalette.primaryDark},
+              {marginBottom: 8},
+            ]}
+            onPress={handleItemChecked}
+            disabled={isChecking}>
+            {isChecking ? (
+              <ActivityIndicator size="small" color={Colors.background} />
+            ) : (
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+                Mark as Checked
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket &&
+         ordershipmentgroupid > 0 &&
+         shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemChecked && (
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
               {backgroundColor: ColorPalette.primary},
-              $.mb_2,
+              {marginBottom: 8},
+            ]}
+            onPress={handleItemPacked}
+            disabled={isPacking}>
+            {isPacking ? (
+              <ActivityIndicator size="small" color={Colors.background} />
+            ) : (
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+                Mark as Packed
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Request Pickup Button - Only show for Shiprocket after Packed */}
+        {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket &&
+         ordershipmentgroupid > 0 &&
+         shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemPacked && (
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {backgroundColor: ColorPalette.primary},
+              {marginBottom: 8},
             ]}
             onPress={handleRequestPickup}
             disabled={isRequestingPickup || selectedCourierId <= 0}>
             {isRequestingPickup ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
                 Request for Pickup
               </Text>
             )}
@@ -677,14 +850,14 @@ export function CreateShipmentScreen() {
             style={[
               styles.actionButton,
               {backgroundColor: ColorPalette.error},
-              $.mb_2,
+              {marginBottom: 8},
             ]}
             onPress={handleCancelPickup}
             disabled={isCancelingPickup}>
             {isCancelingPickup ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
                 Cancel Pickup
               </Text>
             )}
@@ -704,14 +877,14 @@ export function CreateShipmentScreen() {
             style={[
               styles.actionButton,
               {backgroundColor: ColorPalette.error},
-              $.mb_3,
+              $.mb_2,
             ]}
             onPress={handleCancelShipment}
             disabled={isCancelingShipment}>
             {isCancelingShipment ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
                 Cancel Shipment
               </Text>
             )}
@@ -724,32 +897,32 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate &&
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans &&
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans.length > 0 && (
-          <View style={[styles.trackingCard, $.mb_3]}>
-            <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
+          <View style={[styles.trackingCard, $.mb_2]}>
+            <Text style={[$.h6, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
               Tracking Details
             </Text>
             {shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans.map((scan, index) => {
               const isLast = index === shipmentData.ordershipmentgroup.shiprocketwebhookupdate!.scans!.length - 1;
               return (
-                <View key={index} style={[styles.trackingItem, !isLast ? $.mb_2 : {}]}>
-                  <View style={[$.flex_row, $.justify_content_spaceBetween, $.align_items_start, $.mb_1]}>
+                <View key={index} style={[styles.trackingItem, !isLast ? {marginBottom: 8} : {}]}>
+                  <View style={[$.flex_row, $.justify_content_spaceBetween, $.align_items_start]}>
                     <View style={[$.flex_1, $.mr_2]}>
-                      <Text style={[$.h6, $.font_weight_600, {color: Colors.text}]}>
+                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
                         {scan.activity}
                       </Text>
                       {scan.location && (
-                        <Text style={[$.h7, {color: Colors.textSecondary}, $.mt_1]}>
+                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2, fontSize: 11}]}>
                           📍 {scan.location}
                         </Text>
                       )}
                     </View>
-                    <Text style={[$.h7, {color: Colors.textSecondary}]}>
+                    <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>
                       {formatDateTime(scan.date)}
                     </Text>
                   </View>
                   {scan.status && (
-                    <View style={[styles.statusTag, $.mt_1]}>
-                      <Text style={[$.h7, {color: Colors.textSecondary}]}>
+                    <View style={[styles.statusTag, {marginTop: 4}]}>
+                      <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>
                         {scan.status}
                       </Text>
                     </View>
@@ -760,14 +933,15 @@ export function CreateShipmentScreen() {
           </View>
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Partner Selection Bottom Sheet */}
       <BottomSheet
         visible={showPartnerSheet}
         onClose={() => setShowPartnerSheet(false)}
         height="40%">
-        <View style={[$.mb_3]}>
-          <Text style={[$.h4, $.font_weight_bold, {color: Colors.text}, $.mb_3]}>
+        <View style={[$.mb_2]}>
+          <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
             Select Partner
           </Text>
           {shipmentData.partnerlist.map((partner) => (
@@ -776,17 +950,17 @@ export function CreateShipmentScreen() {
               style={[
                 styles.partnerSheetItem,
                 selectedPartner === partner.value && styles.partnerSheetItemSelected,
-                $.mb_2,
+                {marginBottom: 8},
               ]}
               onPress={() => {
                 setSelectedPartner(partner.value);
                 setShowPartnerSheet(false);
               }}>
-              <Text style={[$.h5, {color: Colors.text}]}>
+              <Text style={[$.h6, {color: Colors.text}]}>
                 {partner.label}
               </Text>
               {selectedPartner === partner.value && (
-                <Text style={[$.h5, {color: Colors.primary}]}>✓</Text>
+                <Text style={[$.h6, {color: Colors.primary}]}>✓</Text>
               )}
             </TouchableOpacity>
           ))}
@@ -799,8 +973,8 @@ export function CreateShipmentScreen() {
 const styles = StyleSheet.create({
   locationItem: {
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: Colors.divider,
   },
@@ -813,8 +987,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: Colors.divider,
     justifyContent: 'space-between',
@@ -824,8 +998,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: Colors.divider,
   },
@@ -836,8 +1010,8 @@ const styles = StyleSheet.create({
   },
   orderItem: {
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: Colors.divider,
   },
@@ -846,26 +1020,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderRadius: 4,
     borderWidth: 2,
     borderColor: Colors.primary,
-    marginRight: 12,
+    marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxSelected: {
-    width: 16,
-    height: 16,
+    width: 12,
+    height: 12,
     borderRadius: 2,
     backgroundColor: Colors.primary,
   },
   orderImage: {
-    width: 60,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
+    width: 50,
+    height: 65,
+    borderRadius: 6,
+    marginRight: 10,
     backgroundColor: Colors.divider,
   },
   orderDetails: {
@@ -874,25 +1048,25 @@ const styles = StyleSheet.create({
   packageRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   packageField: {
     flex: 1,
     marginHorizontal: 4,
   },
   createButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 56,
+    minHeight: 48,
     ...$.shadow_medium,
   },
   courierItem: {
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
     borderColor: Colors.divider,
   },
@@ -907,34 +1081,34 @@ const styles = StyleSheet.create({
   },
   courierDetails: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 10,
   },
   actionButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 44,
     ...$.shadow_medium,
   },
   trackingCard: {
     backgroundColor: Colors.inputBackground,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: Colors.divider,
   },
   trackingItem: {
-    paddingBottom: 12,
+    paddingBottom: 8,
     borderLeftWidth: 2,
     borderLeftColor: Colors.primary,
-    paddingLeft: 12,
+    paddingLeft: 10,
   },
   statusTag: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
     borderRadius: 4,
     backgroundColor: Colors.background,
     borderWidth: 1,

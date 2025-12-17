@@ -2,6 +2,9 @@ export namespace OrderShipmentGroup {
   export enum OrderShipmentGroupStatus {
     None = 0,
     OrderCreated = 100,
+    ItemPicked = 130,
+    ItemChecked = 160,
+    ItemPacked = 190,
     PickupScheduled = 200,
     PickedUp = 300,
     Shipped = 400,
@@ -26,6 +29,12 @@ export namespace OrderShipmentGroup {
     switch (status) {
       case OrderShipmentGroupStatus.OrderCreated:
         return 'Order Created';
+      case OrderShipmentGroupStatus.ItemPicked:
+        return 'Item Picked';
+      case OrderShipmentGroupStatus.ItemChecked:
+        return 'Item Checked';
+      case OrderShipmentGroupStatus.ItemPacked:
+        return 'Item Packed';
       case OrderShipmentGroupStatus.PickupScheduled:
         return 'Pickup Scheduled';
       case OrderShipmentGroupStatus.PickedUp:
@@ -184,6 +193,22 @@ export interface OrderShipmentGroupCreateCustomOrderReq {
 
 export interface OrderShipmentGroupCreateCustomOrderRes {
   ordershipmentgroupid: number;
+}
+
+// Item lifecycle updates
+export interface OrderShipmentGroupItemPickedReq {
+  ordershipmentgroupid: number;
+  notes: string;
+}
+
+export interface OrderShipmentGroupItemCheckedReq {
+  ordershipmentgroupid: number;
+  notes: string;
+}
+
+export interface OrderShipmentGroupItemPackedReq {
+  ordershipmentgroupid: number;
+  notes: string;
 }
 
 // Available Courier Company

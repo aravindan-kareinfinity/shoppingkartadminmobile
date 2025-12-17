@@ -12,6 +12,7 @@ import {
   PopularOrdersRes,
   OrderGetWithDetailsReq,
   OrderGetWithDetailsRes,
+  OrderGroupGetWithDetailsRes,
   OrderAdminPanelOrderSummaryReq,
   OrderAdminPanelOrderSummaryRes,
   OrderAdminPanelOrderDetailsV3StatusReq,
@@ -19,6 +20,10 @@ import {
   OrderMoveToNextStatusReq,
   OrdersGroupByVendorReq,
   OrdersGroupByVendorRes,
+  OrderGetCustomerSummaryReq,
+  OrderGetCustomerSummaryRes,
+  GetWithDetailCustomerReq,
+  GetWithDetailCustomerRes,
 } from '../models/orders.model';
 
 export class OrdersService {
@@ -29,9 +34,35 @@ export class OrdersService {
     return state?.environment?.url || require('../utils/environment').environment.baseurl;
   }
 
-  async getWithDetails(req: OrderGetWithDetailsReq): Promise<OrderGetWithDetailsRes[]> {
-    const response = await axios.post(`${this.getBaseUrl()}/api/Orders/GetWithDetails`, req);
-    return response.data;
+  async getWithDetailsDefault(req: OrderGetWithDetailsReq): Promise<OrderGetWithDetailsRes[]> {
+    const postData: ActionReq<OrderGetWithDetailsReq> = new ActionReq<OrderGetWithDetailsReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<OrderGetWithDetailsRes[]>>(
+      `${this.getBaseUrl()}/api/Orders/GetWithDetailsDefault`,
+      postData
+    );
+    return resp.data.item ?? [];
+  }
+
+  async getWithDetailsGroup(req: OrderGetWithDetailsReq): Promise<OrderGroupGetWithDetailsRes[]> {
+    const postData: ActionReq<OrderGetWithDetailsReq> = new ActionReq<OrderGetWithDetailsReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<OrderGroupGetWithDetailsRes[]>>(
+      `${this.getBaseUrl()}/api/Orders/GetWithDetailsGroup`,
+      postData
+    );
+    return resp.data.item ?? [];
+  }
+
+  // Customer summary by customer (mobile)
+  async getWithDetailCustomer(req: GetWithDetailCustomerReq): Promise<GetWithDetailCustomerRes[]> {
+    const postData: ActionReq<GetWithDetailCustomerReq> = new ActionReq<GetWithDetailCustomerReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<GetWithDetailCustomerRes[]>>(
+      `${this.getBaseUrl()}/api/Orders/GetWithDetailCustomer`,
+      postData
+    );
+    return resp.data.item ?? [];
   }
 
   async adminPanelOrderSummary(req: OrderAdminPanelOrderSummaryReq): Promise<OrderAdminPanelOrderSummaryRes> {
@@ -166,4 +197,15 @@ export class OrdersService {
     }
     return result;
   }
+
+  async getCustomerSummary(req: OrderGetCustomerSummaryReq): Promise<OrderGetCustomerSummaryRes[]> {
+    const postData: ActionReq<OrderGetCustomerSummaryReq> = new ActionReq<OrderGetCustomerSummaryReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<OrderGetCustomerSummaryRes[]>>(
+      `${this.getBaseUrl()}/api/Orders/GetCustomerSummary`,
+      postData
+    );
+    return resp.data.item ?? [];
+  }
+
 }

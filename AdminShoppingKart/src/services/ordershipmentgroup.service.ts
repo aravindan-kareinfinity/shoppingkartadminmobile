@@ -16,6 +16,9 @@ import {
   OrderShipmentGroupRequestForShipmentPickupReq,
   OrderShipmentGroupCancelShiprocketShipmentReq,
   OrderShipmentGroupCancelShiprocketOrderReq,
+  OrderShipmentGroupItemPickedReq,
+  OrderShipmentGroupItemCheckedReq,
+  OrderShipmentGroupItemPackedReq,
 } from '../models/ordershipmentgroup.model';
 
 export class OrderShipmentGroupService {
@@ -134,5 +137,35 @@ export class OrderShipmentGroupService {
       return resp.data.item;
     }
     throw new Error('No data returned from API');
+  }
+
+  async itemPicked(req: OrderShipmentGroupItemPickedReq): Promise<boolean> {
+    const postData: ActionReq<OrderShipmentGroupItemPickedReq> = new ActionReq<OrderShipmentGroupItemPickedReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<boolean>>(
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/ItemPicked`,
+      postData
+    );
+    return resp.data.item ?? false;
+  }
+
+  async itemChecked(req: OrderShipmentGroupItemCheckedReq): Promise<boolean> {
+    const postData: ActionReq<OrderShipmentGroupItemCheckedReq> = new ActionReq<OrderShipmentGroupItemCheckedReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<boolean>>(
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/ItemChecked`,
+      postData
+    );
+    return resp.data.item ?? false;
+  }
+
+  async itemPacked(req: OrderShipmentGroupItemPackedReq): Promise<boolean> {
+    const postData: ActionReq<OrderShipmentGroupItemPackedReq> = new ActionReq<OrderShipmentGroupItemPackedReq>();
+    postData.item = req;
+    const resp = await axios.post<ActionRes<boolean>>(
+      `${this.getBaseUrl()}/api/OrderShipmentGroup/ItemPacked`,
+      postData
+    );
+    return resp.data.item ?? false;
   }
 }
