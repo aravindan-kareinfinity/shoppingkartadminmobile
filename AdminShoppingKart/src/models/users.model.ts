@@ -179,3 +179,130 @@ export class UsersContext {
   user: Users = new Users();
 }
 
+// Dashboard Models
+export enum DateRangeFilterTypes {
+  Today = 0,
+  Yesterday = 1,
+  Last7Days = 2,
+  Last30Days = 3,
+}
+
+export enum OrderStatusViewTypes {
+  ByIndividualOrder = 0,
+  ByOrderGroup = 1,
+}
+
+export interface LabelValuePair<T> {
+  label: string;
+  value: T;
+}
+
+export function getDateRangeFilterTypes(): LabelValuePair<number>[] {
+  return [
+    {label: 'Today', value: DateRangeFilterTypes.Today},
+    {label: 'Yesterday', value: DateRangeFilterTypes.Yesterday},
+    {label: 'Last 7 days', value: DateRangeFilterTypes.Last7Days},
+    {label: 'Last 30 days', value: DateRangeFilterTypes.Last30Days},
+  ];
+}
+
+export class UserAdminPanelDashboardRevenueCardRes {
+  totalrevenue: number = 0;
+}
+
+export class UserAdminPanelDashboardTotalOrderCardRes {
+  oredercount: number = 0;
+}
+
+export class UserAdminPanelDashboardPendingOrderCardRes {
+  oredercount: number = 0;
+}
+
+export class UserAdminPanelDashboardLowStockRes {
+  lowstockcount: number = 0;
+}
+
+export class UsersAdminPanelDashboardIndividualOrderStatusChartData {
+  status: number = 0;
+  count: number = 0;
+}
+
+export class UsersAdminPanelDashboardGroupOrderStatusChartData {
+  status: number = 0;
+  groupcount: number = 0;
+}
+
+export class UsersAdminPanelDashboardOrderStatusChartRes {
+  individualorderstatus: UsersAdminPanelDashboardIndividualOrderStatusChartData[] = [];
+  grouporderstatus: UsersAdminPanelDashboardGroupOrderStatusChartData[] = [];
+}
+
+export class UsersAdminPanelDashboardNetSaleData {
+  date: string = '';
+  salevalue: number = 0;
+}
+
+export class UsersAdminPanelDashboardNetSaleChartRes {
+  netsalelist: UsersAdminPanelDashboardNetSaleData[] = [];
+}
+
+export class UsersAdminPanelDashboardNetOrderData {
+  date: string = '';
+  ordercount: number = 0;
+}
+
+export class UsersAdminPanelDashboardNetOrderChartRes {
+  netorderlist: UsersAdminPanelDashboardNetOrderData[] = [];
+}
+
+export class UsersAdminPanelDashboardTopProductData {
+  productname: string = '';
+  totalquantitysold: number = 0;
+}
+
+export class UsersAdminPanelDashboardTopProductChartRes {
+  topproductlist: UsersAdminPanelDashboardTopProductData[] = [];
+}
+
+export class UsersAdminPanelDashboardTopDesignsData {
+  designname: string = '';
+  totalquantitysold: number = 0;
+}
+
+export class UsersAdminPanelDashboardTopDesignsChartRes {
+  topdesignlist: UsersAdminPanelDashboardTopDesignsData[] = [];
+}
+
+export class UsersAdminPanelDashboardOrderStatusChartReq {
+  datefilter: DateRangeFilterTypes = DateRangeFilterTypes.Today;
+  orderviewtype: OrderStatusViewTypes = OrderStatusViewTypes.ByIndividualOrder;
+}
+
+export class UserAdminPanelDashboardReq {
+  iscustomdate: boolean = false;
+  datefilter: DateRangeFilterTypes = DateRangeFilterTypes.Today;
+  orderstastuchartreq: UsersAdminPanelDashboardOrderStatusChartReq =
+    new UsersAdminPanelDashboardOrderStatusChartReq();
+}
+
+export class UserAdminPanelDashboardRes {
+  revenuecarddata: UserAdminPanelDashboardRevenueCardRes =
+    new UserAdminPanelDashboardRevenueCardRes();
+  totalordercarddata: UserAdminPanelDashboardTotalOrderCardRes =
+    new UserAdminPanelDashboardTotalOrderCardRes();
+  pendingordercarddata: UserAdminPanelDashboardPendingOrderCardRes =
+    new UserAdminPanelDashboardPendingOrderCardRes();
+  lowstockdata: UserAdminPanelDashboardLowStockRes =
+    new UserAdminPanelDashboardLowStockRes();
+  orderstatuschartdata: UsersAdminPanelDashboardOrderStatusChartRes =
+    new UsersAdminPanelDashboardOrderStatusChartRes();
+  netsalechartdata: UsersAdminPanelDashboardNetSaleChartRes =
+    new UsersAdminPanelDashboardNetSaleChartRes();
+  netorderchartdata: UsersAdminPanelDashboardNetOrderChartRes =
+    new UsersAdminPanelDashboardNetOrderChartRes();
+  topproductdata: UsersAdminPanelDashboardTopProductChartRes =
+    new UsersAdminPanelDashboardTopProductChartRes();
+  topdesigndata: UsersAdminPanelDashboardTopDesignsChartRes =
+    new UsersAdminPanelDashboardTopDesignsChartRes();
+}
+

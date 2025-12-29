@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  StyleSheet,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -468,10 +467,10 @@ export function CreateShipmentScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[$.pb_4]}>
         <View style={[$.mb_2]}>
-          <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, {marginBottom: 2}]}>
+          <Text style={[$.h5, $.font_weight_bold, $.text_plain, $.mb_1]}>
             {ordershipmentgroupid > 0 ? 'Update Shipment' : 'Create Shipment'}
           </Text>
-          <Text style={[$.h7, {color: Colors.textSecondary}]}>
+          <Text style={[$.h7, $.text_muted]}>
             Order Group: {ordergroupid}
           </Text>
         </View>
@@ -482,19 +481,19 @@ export function CreateShipmentScreen() {
             Partner
           </Text>
           {ordershipmentgroupid > 0 ? (
-            <View style={[styles.partnerSelector, {marginBottom: 8, opacity: 0.6}]}>
-              <Text style={[$.h6, {color: Colors.text, flex: 1}]}>
+            <View style={[$.flex_row, $.align_items_center, $.justify_content_spaceBetween, $.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_2, $.opacity_75]}>
+              <Text style={[$.h6, $.text_plain, $.flex_1]}>
                 {shipmentData.partnerlist.find(p => p.value === selectedPartner)?.label || 'Select Partner'}
               </Text>
             </View>
           ) : (
             <TouchableOpacity
-              style={[styles.partnerSelector, {marginBottom: 8}]}
+              style={[$.flex_row, $.align_items_center, $.justify_content_spaceBetween, $.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_2]}
               onPress={() => setShowPartnerSheet(true)}>
-              <Text style={[$.h6, {color: Colors.text, flex: 1}]}>
+              <Text style={[$.h6, $.text_plain, $.flex_1]}>
                 {shipmentData.partnerlist.find(p => p.value === selectedPartner)?.label || 'Select Partner'}
               </Text>
-              <Text style={[$.h6, {color: Colors.textSecondary}]}>▼</Text>
+              <Text style={[$.h6, $.text_muted]}>▼</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -524,32 +523,30 @@ export function CreateShipmentScreen() {
                 <View
                   key={index}
                   style={[
-                    styles.locationItem,
-                    pickupLocation === location.locationname && styles.locationItemSelected,
-                    {marginBottom: 6, opacity: 0.6},
+                    $.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_1, $.opacity_75,
+                    pickupLocation === location.locationname && [$.border_primary, $.border_2, {backgroundColor: ColorPalette.primaryLight + '20'}],
                   ]}>
-                  <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>{location.locationname}</Text>
-                  <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>Pincode: {location.pincode}</Text>
+                  <Text style={[$.h7, $.font_weight_600, $.text_plain]}>{location.locationname}</Text>
+                  <Text style={[$.h7, $.text_muted, $.small]}>Pincode: {location.pincode}</Text>
                 </View>
               ) : (
                 <TouchableOpacity
                   key={index}
                   style={[
-                    styles.locationItem,
-                    pickupLocation === location.locationname && styles.locationItemSelected,
-                    {marginBottom: 6},
+                    $.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_1,
+                    pickupLocation === location.locationname && [$.border_primary, $.border_2, {backgroundColor: ColorPalette.primaryLight + '20'}],
                   ]}
                   onPress={() => {
                     setPickupLocation(location.locationname);
                     setPickupLocationPincode(location.pincode);
                   }}>
-                  <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>{location.locationname}</Text>
-                  <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>Pincode: {location.pincode}</Text>
+                  <Text style={[$.h7, $.font_weight_600, $.text_plain]}>{location.locationname}</Text>
+                  <Text style={[$.h7, $.text_muted, $.small]}>Pincode: {location.pincode}</Text>
                 </TouchableOpacity>
               )
             ))
           ) : (
-            <Text style={[$.h6, {color: Colors.textSecondary}]}>No pickup locations available</Text>
+            <Text style={[$.h6, $.text_muted]}>No pickup locations available</Text>
           )}
         </View>
         )}
@@ -564,30 +561,30 @@ export function CreateShipmentScreen() {
               return (
                 <View
                   key={order.orderid}
-                  style={[styles.orderItem, {marginBottom: 6, opacity: 0.6}]}>
-                  <View style={styles.orderItemContent}>
-                    <View style={styles.checkbox}>
+                  style={[$.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_1, $.opacity_75]}>
+                  <View style={[$.flex_row, $.align_items_center]}>
+                    <View style={[{width: 20, height: 20}, $.border_rounded, $.border_2, $.border_primary, $.mr_2, $.justify_content_center, $.align_items_center]}>
                       {selectedOrders.includes(order.orderid) && (
-                        <View style={styles.checkboxSelected} />
+                        <View style={[{width: 12, height: 12}, $.border_rounded_05, $.bg_primary]} />
                       )}
                     </View>
                     {order.fileid > 0 && (
                       <Image
                         source={{uri: getImageUrl(order.fileid)}}
-                        style={styles.orderImage}
+                        style={{width: 50, height: 65, borderRadius: 6, marginRight: 8, backgroundColor: Colors.divider}}
                         resizeMode="cover"
                       />
                     )}
-                    <View style={styles.orderDetails}>
-                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
+                    <View style={$.flex_1}>
+                      <Text style={[$.h7, $.font_weight_600, $.text_plain]}>
                         Order #{order.orderid}
                       </Text>
                       {order.designcode && (
-                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]} numberOfLines={1}>
+                        <Text style={[$.h7, $.text_muted, $.mt_1]} numberOfLines={1}>
                           {order.designcode}
                         </Text>
                       )}
-                      <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]}>
+                      <Text style={[$.h7, $.text_muted, $.mt_1]}>
                         Qty: {order.orderquantity} | {formatPrice(order.ordernetprice)}
                       </Text>
                     </View>
@@ -598,31 +595,31 @@ export function CreateShipmentScreen() {
               return (
                 <TouchableOpacity
                   key={order.orderid}
-                  style={[styles.orderItem, {marginBottom: 6}]}
+                  style={[$.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_1]}
                   onPress={() => toggleOrderSelection(order.orderid)}>
-                  <View style={styles.orderItemContent}>
-                    <View style={styles.checkbox}>
+                  <View style={[$.flex_row, $.align_items_center]}>
+                    <View style={[{width: 20, height: 20}, $.border_rounded, $.border_2, $.border_primary, $.mr_2, $.justify_content_center, $.align_items_center]}>
                       {selectedOrders.includes(order.orderid) && (
-                        <View style={styles.checkboxSelected} />
+                        <View style={[{width: 12, height: 12}, $.border_rounded_05, $.bg_primary]} />
                       )}
                     </View>
                     {order.fileid > 0 && (
                       <Image
                         source={{uri: getImageUrl(order.fileid)}}
-                        style={styles.orderImage}
+                        style={{width: 50, height: 65, borderRadius: 6, marginRight: 8, backgroundColor: Colors.divider}}
                         resizeMode="cover"
                       />
                     )}
-                    <View style={styles.orderDetails}>
-                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
+                    <View style={$.flex_1}>
+                      <Text style={[$.h7, $.font_weight_600, $.text_plain]}>
                         Order #{order.orderid}
                       </Text>
                       {order.designcode && (
-                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]} numberOfLines={1}>
+                        <Text style={[$.h7, $.text_muted, $.mt_1]} numberOfLines={1}>
                           {order.designcode}
                         </Text>
                       )}
-                      <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]}>
+                      <Text style={[$.h7, $.text_muted, $.mt_1]}>
                         Qty: {order.orderquantity} | {formatPrice(order.ordernetprice)}
                       </Text>
                     </View>
@@ -636,11 +633,11 @@ export function CreateShipmentScreen() {
         {/* Package Details - Only show for Shiprocket */}
         {selectedPartner === OrderShipmentGroup.OrderShipmentGroupPartners.Shiprocket && (
           <View style={[$.mb_2]}>
-            <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+            <Text style={[$.h7, $.font_weight_600, $.text_plain, $.mb_1]}>
               Package Details
             </Text>
-          <View style={styles.packageRow}>
-            <View style={styles.packageField}>
+          <View style={[$.flex_row, $.justify_content_spaceBetween, $.mb_2]}>
+            <View style={[$.flex_1, $.mx_1]}>
               <FormInput
                 label="Length"
                 value={packageLength}
@@ -650,7 +647,7 @@ export function CreateShipmentScreen() {
                 editable={!isSubmitting && ordershipmentgroupid === 0}
               />
             </View>
-            <View style={styles.packageField}>
+            <View style={[$.flex_1, $.mx_1]}>
               <FormInput
                 label="Breadth"
                 value={packageBreadth}
@@ -661,8 +658,8 @@ export function CreateShipmentScreen() {
               />
             </View>
           </View>
-          <View style={styles.packageRow}>
-            <View style={styles.packageField}>
+          <View style={[$.flex_row, $.justify_content_spaceBetween, $.mb_2]}>
+            <View style={[$.flex_1, $.mx_1]}>
               <FormInput
                 label="Height"
                 value={packageHeight}
@@ -672,7 +669,7 @@ export function CreateShipmentScreen() {
                 editable={!isSubmitting && ordershipmentgroupid === 0}
               />
             </View>
-            <View style={styles.packageField}>
+            <View style={[$.flex_1, $.mx_1]}>
               <FormInput
                 label="Weight"
                 value={packageWeight}
@@ -692,39 +689,38 @@ export function CreateShipmentScreen() {
          shipmentData.shiprocketavailablecouriercompanylist &&
          shipmentData.shiprocketavailablecouriercompanylist.length > 0 && (
           <View style={[$.mb_2]}>
-            <Text style={[$.h7, $.font_weight_600, {color: Colors.text}, $.mb_1]}>
+            <Text style={[$.h7, $.font_weight_600, $.text_plain, $.mb_1]}>
               Available Couriers
             </Text>
             {shipmentData.shiprocketavailablecouriercompanylist.map((courier, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
-                  styles.courierItem,
-                  selectedCourierId === courier.courier_company_id && styles.courierItemSelected,
-                  {marginBottom: 6},
+                  $.bg_inputbg, $.border_rounded_1, $.p_2, $.border, $.border_default, $.mb_1,
+                  selectedCourierId === courier.courier_company_id && [$.border_primary, $.border_2, {backgroundColor: ColorPalette.primaryLight + '20'}],
                 ]}
                 onPress={() => setSelectedCourierId(courier.courier_company_id)}>
-                <View style={styles.courierContent}>
-                  <View style={styles.checkbox}>
+                <View style={[$.flex_row, $.align_items_center]}>
+                  <View style={[{width: 20, height: 20}, $.border_rounded, {borderWidth: 2}, $.border_primary, $.mr_2, $.justify_content_center, $.align_items_center]}>
                     {selectedCourierId === courier.courier_company_id && (
-                      <View style={styles.checkboxSelected} />
+                      <View style={[{width: 12, height: 12}, $.border_rounded_05, $.bg_primary]} />
                     )}
                   </View>
-                  <View style={styles.courierDetails}>
-                    <Text style={[$.h6, $.font_weight_600, {color: Colors.text}]}>
+                  <View style={[$.flex_1, $.ml_2]}>
+                    <Text style={[$.h6, $.font_weight_600, $.text_plain]}>
                       {courier.courier_name}
                     </Text>
                     <View style={[$.flex_row, $.justify_content_spaceBetween, $.mt_1]}>
-                      <Text style={[$.h7, {color: Colors.textSecondary}]}>
+                      <Text style={[$.h7, $.text_muted]}>
                         ₹{courier.rate.toFixed(2)}
                       </Text>
                       {courier.etd && (
-                        <Text style={[$.h7, {color: Colors.textSecondary}]}>
+                        <Text style={[$.h7, $.text_muted]}>
                           ETD: {courier.etd}
                         </Text>
                       )}
                       {courier.rating && (
-                        <Text style={[$.h7, {color: Colors.textSecondary}]}>
+                        <Text style={[$.h7, $.text_muted]}>
                           ⭐ {courier.rating}
                         </Text>
                       )}
@@ -740,8 +736,9 @@ export function CreateShipmentScreen() {
         {ordershipmentgroupid === 0 && (
           <TouchableOpacity
             style={[
-              styles.createButton,
-              {backgroundColor: ColorPalette.primary},
+              $.py_3, $.px_5, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 48},
+              $.shadow_medium,
+              $.bg_primary,
               $.mb_2,
             ]}
             onPress={handleCreateShipment}
@@ -749,7 +746,7 @@ export function CreateShipmentScreen() {
             {isSubmitting ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Create Shipment
               </Text>
             )}
@@ -762,16 +759,17 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.OrderCreated && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.secondaryDark},
-              {marginBottom: 8},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_secondaryDark,
+              $.mb_2,
             ]}
             onPress={handleItemPicked}
             disabled={isPicking}>
             {isPicking ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Mark as Picked
               </Text>
             )}
@@ -783,16 +781,17 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemPicked && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.primaryDark},
-              {marginBottom: 8},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_primaryDark,
+              $.mb_2,
             ]}
             onPress={handleItemChecked}
             disabled={isChecking}>
             {isChecking ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Mark as Checked
               </Text>
             )}
@@ -804,16 +803,17 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemChecked && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.primary},
-              {marginBottom: 8},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_primary,
+              $.mb_2,
             ]}
             onPress={handleItemPacked}
             disabled={isPacking}>
             {isPacking ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Mark as Packed
               </Text>
             )}
@@ -826,16 +826,17 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.ItemPacked && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.primary},
-              {marginBottom: 8},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_primary,
+              $.mb_2,
             ]}
             onPress={handleRequestPickup}
             disabled={isRequestingPickup || selectedCourierId <= 0}>
             {isRequestingPickup ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Request for Pickup
               </Text>
             )}
@@ -848,16 +849,17 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus === OrderShipmentGroup.OrderShipmentGroupStatus.PickupScheduled && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.error},
-              {marginBottom: 8},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_danger,
+              $.mb_2,
             ]}
             onPress={handleCancelPickup}
             disabled={isCancelingPickup}>
             {isCancelingPickup ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Cancel Pickup
               </Text>
             )}
@@ -875,8 +877,9 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.ordershipmentgroupstatus !== OrderShipmentGroup.OrderShipmentGroupStatus.OutForDelivery && (
           <TouchableOpacity
             style={[
-              styles.actionButton,
-              {backgroundColor: ColorPalette.error},
+              $.py_3, {paddingHorizontal: 18}, $.border_rounded_1, $.align_items_center, $.justify_content_center, {minHeight: 44},
+              $.shadow_medium,
+              $.bg_danger,
               $.mb_2,
             ]}
             onPress={handleCancelShipment}
@@ -884,7 +887,7 @@ export function CreateShipmentScreen() {
             {isCancelingShipment ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_white]}>
                 Cancel Shipment
               </Text>
             )}
@@ -897,32 +900,32 @@ export function CreateShipmentScreen() {
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate &&
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans &&
          shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans.length > 0 && (
-          <View style={[styles.trackingCard, $.mb_2]}>
-            <Text style={[$.h6, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
+          <View style={[$.bg_inputbg, $.border_rounded_1, $.p_3, $.border, $.border_default, $.mb_2]}>
+            <Text style={[$.h6, $.font_weight_bold, $.text_plain, $.mb_2]}>
               Tracking Details
             </Text>
             {shipmentData.ordershipmentgroup.shiprocketwebhookupdate.scans.map((scan, index) => {
               const isLast = index === shipmentData.ordershipmentgroup.shiprocketwebhookupdate!.scans!.length - 1;
               return (
-                <View key={index} style={[styles.trackingItem, !isLast ? {marginBottom: 8} : {}]}>
+                <View key={index} style={[$.pb_2, $.border_left_2, $.border_primary, $.pl_2, !isLast ? $.mb_2 : {}]}>
                   <View style={[$.flex_row, $.justify_content_spaceBetween, $.align_items_start]}>
                     <View style={[$.flex_1, $.mr_2]}>
-                      <Text style={[$.h7, $.font_weight_600, {color: Colors.text}]}>
+                      <Text style={[$.h7, $.font_weight_600, $.text_plain]}>
                         {scan.activity}
                       </Text>
                       {scan.location && (
-                        <Text style={[$.h7, {color: Colors.textSecondary, marginTop: 2, fontSize: 11}]}>
+                        <Text style={[$.h7, $.text_muted, $.mt_1, $.small]}>
                           📍 {scan.location}
                         </Text>
                       )}
                     </View>
-                    <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>
+                    <Text style={[$.h7, $.text_muted, $.small]}>
                       {formatDateTime(scan.date)}
                     </Text>
                   </View>
                   {scan.status && (
-                    <View style={[styles.statusTag, {marginTop: 4}]}>
-                      <Text style={[$.h7, {color: Colors.textSecondary, fontSize: 11}]}>
+                    <View style={[$.align_self_start, {paddingHorizontal: 6, paddingVertical: 3}, $.border_rounded, $.bg_background, $.border, $.border_default, $.mt_1]}>
+                      <Text style={[$.h7, $.text_muted, $.small]}>
                         {scan.status}
                       </Text>
                     </View>
@@ -941,26 +944,25 @@ export function CreateShipmentScreen() {
         onClose={() => setShowPartnerSheet(false)}
         height="40%">
         <View style={[$.mb_2]}>
-          <Text style={[$.h5, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
+          <Text style={[$.h5, $.font_weight_bold, $.text_plain, $.mb_2]}>
             Select Partner
           </Text>
           {shipmentData.partnerlist.map((partner) => (
             <TouchableOpacity
               key={partner.value}
               style={[
-                styles.partnerSheetItem,
-                selectedPartner === partner.value && styles.partnerSheetItemSelected,
-                {marginBottom: 8},
+                $.flex_row, $.align_items_center, $.justify_content_spaceBetween, $.bg_inputbg, $.border_rounded_1, $.p_3, $.border, $.border_default, $.mb_2,
+                selectedPartner === partner.value && [$.border_primary, $.border_2, {backgroundColor: ColorPalette.primaryLight + '20'}],
               ]}
               onPress={() => {
                 setSelectedPartner(partner.value);
                 setShowPartnerSheet(false);
               }}>
-              <Text style={[$.h6, {color: Colors.text}]}>
+              <Text style={[$.h6, $.text_plain]}>
                 {partner.label}
               </Text>
               {selectedPartner === partner.value && (
-                <Text style={[$.h6, {color: Colors.primary}]}>✓</Text>
+                <Text style={[$.h6, $.text_primary]}>✓</Text>
               )}
             </TouchableOpacity>
           ))}
@@ -969,149 +971,3 @@ export function CreateShipmentScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  locationItem: {
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-  locationItemSelected: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-    backgroundColor: ColorPalette.primaryLight + '20',
-  },
-  partnerSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-    justifyContent: 'space-between',
-  },
-  partnerSheetItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-  partnerSheetItemSelected: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-    backgroundColor: ColorPalette.primaryLight + '20',
-  },
-  orderItem: {
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-  orderItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    width: 12,
-    height: 12,
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
-  },
-  orderImage: {
-    width: 50,
-    height: 65,
-    borderRadius: 6,
-    marginRight: 10,
-    backgroundColor: Colors.divider,
-  },
-  orderDetails: {
-    flex: 1,
-  },
-  packageRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  packageField: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  createButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 48,
-    ...$.shadow_medium,
-  },
-  courierItem: {
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-  courierItemSelected: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-    backgroundColor: ColorPalette.primaryLight + '20',
-  },
-  courierContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  courierDetails: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  actionButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 44,
-    ...$.shadow_medium,
-  },
-  trackingCard: {
-    backgroundColor: Colors.inputBackground,
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-  trackingItem: {
-    paddingBottom: 8,
-    borderLeftWidth: 2,
-    borderLeftColor: Colors.primary,
-    paddingLeft: 10,
-  },
-  statusTag: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.divider,
-  },
-});

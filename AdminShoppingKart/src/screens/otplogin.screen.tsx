@@ -142,37 +142,34 @@ export function OTPLoginScreen() {
   };
 
   return (
-    <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
+    <SafeAreaView style={[$.flex_1, $.bg_background]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={$.flex_1}>
         <View style={[$.flex_1, $.justify_content_center, $.px_4]}>
           <View style={[$.mb_5, $.align_items_center]}>
-            <Text style={[$.h3, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
+            <Text style={[$.h3, $.font_weight_bold, $.text_plain, $.mb_2]}>
               Verify with OTP
             </Text>
-            <Text style={[$.h5, {color: Colors.textSecondary}]}>
+            <Text style={[$.h5, $.text_muted]}>
               Enter the OTP sent to {mobilenumber || 'your mobile number'}
             </Text>
           </View>
 
           <View style={$.mb_4}>
-            <Text style={[$.h5, {color: Colors.text}, $.mb_2]}>OTP</Text>
+            <Text style={[$.h5, $.text_plain, $.mb_2]}>OTP</Text>
             <TextInput
               ref={otpInputRef}
               style={[
-                {
-                  height: 56,
-                  borderWidth: 1,
-                  borderColor: Colors.divider,
-                  borderRadius: 8,
-                  paddingHorizontal: 16,
-                  fontSize: 24,
-                  fontWeight: '600',
-                  letterSpacing: 8,
-                  textAlign: 'center',
-                  color: Colors.text,
-                },
+                {height: 56},
+                $.border,
+                $.border_default,
+                $.border_rounded_1,
+                $.px_4,
+                $.h2,
+                $.font_weight_600,
+                {letterSpacing: 8, textAlign: 'center'},
+                $.text_plain,
               ]}
               value={otp}
               onChangeText={(text) => {
@@ -197,7 +194,7 @@ export function OTPLoginScreen() {
               $.border_rounded_2,
               $.align_items_center,
               $.justify_content_center,
-              {backgroundColor: Colors.primary},
+              $.bg_primary,
               $.mb_3,
             ]}
             onPress={handleVerifyOTP}
@@ -205,7 +202,7 @@ export function OTPLoginScreen() {
             {isLoading ? (
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
-              <Text style={[$.h4, $.font_weight_600, {color: Colors.background}]}>
+              <Text style={[$.h4, $.font_weight_600, $.text_white]}>
                 Verify
               </Text>
             )}
@@ -215,7 +212,7 @@ export function OTPLoginScreen() {
             onPress={handleResendOTP}
             disabled={isLoading}
             style={[$.align_items_center, $.mt_3]}>
-            <Text style={[$.h5, {color: Colors.primary}]}>Resend OTP</Text>
+            <Text style={[$.h5, $.text_primary]}>Resend OTP</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

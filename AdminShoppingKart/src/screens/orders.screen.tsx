@@ -15,7 +15,7 @@ import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import {Colors, $, ColorPalette} from '../styles';
 import {HomeTabParamList} from '../hometab.navigation';
 import {OrdersService} from '../services/orders.service';
-import {Orders, OrderTypes, OrderGetWithDetailsReq, OrderGetWithDetailsRes, OrderGroupGetWithDetailsRes, OrderGetCustomerSummaryReq, OrderGetCustomerSummaryRes, GetWithDetailCustomerReq, GetWithDetailCustomerRes} from '../models/orders.model';
+import {Orders, OrderTypes, OrderGetWithDetailsReq, OrderGetWithDetailsRes, OrderGroupGetWithDetailsRes} from '../models/orders.model';
 import {CustomIcon, CustomIcons} from '../components/customicons.component';
 import {BottomSheet} from '../components/bottomsheet.component';
 import {formatPrice} from '../utils/format.utils';
@@ -23,7 +23,6 @@ import {formatDateGB} from '../utils/date.utils';
 import {DatePickerComponent} from '../components/datepicker.component';
 import {DefaultOrdersTab} from './orders/defaultorders.tab';
 import {GroupOrdersTab} from './orders/grouporders.tab';
-import {CustomerOrdersTab} from './orders/customerorders.tab';
 
 type OrdersScreenNavigationProp = BottomTabNavigationProp<HomeTabParamList>;
 
@@ -31,7 +30,6 @@ type OrdersScreenNavigationProp = BottomTabNavigationProp<HomeTabParamList>;
 enum OrdersTabTitles {
   Product = 'Item',
   Order = 'Order',
-  Customer = 'Customer',
 }
 
 export function OrdersScreen() {
@@ -42,8 +40,6 @@ export function OrdersScreen() {
   const [filteredDefaultOrders, setFilteredDefaultOrders] = useState<OrderGetWithDetailsRes[]>([]);
   const [groupedOrdersList, setGroupedOrdersList] = useState<OrderGroupGetWithDetailsRes[]>([]);
   const [filteredGroupedOrdersList, setFilteredGroupedOrdersList] = useState<OrderGroupGetWithDetailsRes[]>([]);
-  const [customerOrdersList, setCustomerOrdersList] = useState<GetWithDetailCustomerRes[]>([]);
-  const [filteredCustomerOrdersList, setFilteredCustomerOrdersList] = useState<GetWithDetailCustomerRes[]>([]);
   const [getall, setGetall] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [showFilterSheet, setShowFilterSheet] = useState(false);
@@ -51,7 +47,6 @@ export function OrdersScreen() {
   const [routes] = useState([
     {key: 'default', title: OrdersTabTitles.Product},
     {key: 'group', title: OrdersTabTitles.Order},
-    {key: 'customer', title: OrdersTabTitles.Customer},
   ]);
   
   // Filter states
@@ -138,40 +133,11 @@ export function OrdersScreen() {
       return filtered;
     };
 
-    const applyCustomerSummaryFilters = (data: GetWithDetailCustomerRes[]) => {
-      let filtered = [...data];
-
-      if (searchText.trim()) {
-        const searchLower = searchText.toLowerCase().trim();
-        filtered = filtered.filter(item => {
-          const customerIdMatch = item.customerid?.toString().includes(searchLower);
-          const customerMatch = item.customername?.toLowerCase().includes(searchLower);
-          const mobileMatch = item.customermobilenumber?.includes(searchLower);
-          const emailMatch = item.customeremail?.toLowerCase().includes(searchLower);
-          return customerIdMatch || customerMatch || mobileMatch || emailMatch;
-        });
-      }
-
-      if (filterFromDate) {
-        filtered = filtered.filter(item => new Date(item.lastorderdate) >= filterFromDate);
-      }
-      if (filterToDate) {
-        const toDateEnd = new Date(filterToDate);
-        toDateEnd.setHours(23, 59, 59, 999);
-        filtered = filtered.filter(item => new Date(item.lastorderdate) <= toDateEnd);
-      }
-
-      // Customer summary doesn't have status field, so skip status filtering
-      return filtered;
-    };
-
     setFilteredDefaultOrders(applyOrderFilters(defaultOrdersList));
     setFilteredGroupedOrdersList(applyGroupOrderFilters(groupedOrdersList));
-    setFilteredCustomerOrdersList(applyCustomerSummaryFilters(customerOrdersList));
   }, [
     groupedOrdersList,
     defaultOrdersList,
-    customerOrdersList,
     searchText,
     filterFromDate,
     filterToDate,
@@ -184,8 +150,6 @@ export function OrdersScreen() {
       fetchDefaultOrders();
     } else if (key === 'group') {
       fetchGroupedOrders();
-    } else if (key === 'customer') {
-      fetchCustomerOrders();
     }
   };
 
@@ -227,26 +191,6 @@ export function OrdersScreen() {
     }
   };
 
-  const fetchCustomerOrders = async () => {
-    setIsLoading(true);
-    try {
-      const request: GetWithDetailCustomerReq = {
-        getall: getall,
-        fromdate: filterFromDate || undefined,
-        todate: filterToDate || undefined,
-        status: filterStatus !== null ? filterStatus : undefined,
-        pendingonly: showPendingOnly || undefined,
-      };
-      const orders = await ordersService.getWithDetailCustomer(request);
-      setCustomerOrdersList(orders);
-    } catch (error) {
-      console.error('Error fetching customer orders:', error);
-      setCustomerOrdersList([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleApplyFilters = () => {
     setShowFilterSheet(false);
     loadTabData(routes[tabIndex].key);
@@ -270,7 +214,7 @@ export function OrdersScreen() {
     showPendingOnly
   );
 
-  const listContainerStyle = StyleSheet.flatten([$.p_3, {gap: 12}]);
+  const listContainerStyle = StyleSheet.flatten([$.p_3, $.gap_3]);
 
   const renderScene = SceneMap({
     default: () => (
@@ -295,21 +239,10 @@ export function OrdersScreen() {
         listContainerStyle={listContainerStyle}
       />
     ),
-    customer: () => (
-      <CustomerOrdersTab
-        data={filteredCustomerOrdersList}
-        isLoading={isLoading}
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={handleClearFilters}
-        onRefresh={fetchCustomerOrders}
-        keyExtractor={item => item.customerid?.toString() || Math.random().toString()}
-        listContainerStyle={listContainerStyle}
-      />
-    ),
   });
 
   return (
-    <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
+    <SafeAreaView style={[$.flex_1, $.bg_background]}>
       <View style={[$.flex_1]}>
         {/* Header */}
         <View
@@ -319,14 +252,14 @@ export function OrdersScreen() {
             $.align_items_center,
             $.bg_background,
             $.border_bottom,
+            $.border_default,
             $.px_3,
             $.py_3,
-            {borderBottomColor: Colors.divider},
           ]}>
-          <Text style={[$.h4, $.font_weight_bold, {color: Colors.text}]}>
+          <Text style={[$.h4, $.font_weight_bold, $.text_plain]}>
             Orders
           </Text>
-          <View style={[$.flex_row, $.align_items_center, {gap: 12}]}>
+          <View style={[$.flex_row, $.align_items_center, $.gap_3]}>
             {isLoading && (
               <ActivityIndicator
                 size="small"
@@ -361,11 +294,12 @@ export function OrdersScreen() {
               $.border_rounded_1,
               $.px_3,
               $.border,
-              {height: 44, borderColor: Colors.divider},
+              $.border_default,
+              {height: 44},
             ]}>
             <CustomIcon name={CustomIcons.Search} color={Colors.textSecondary} size={20} />
             <TextInput
-              style={[$.flex_1, $.ml_2, $.h5, {color: Colors.text}]}
+              style={[$.flex_1, $.ml_2, $.h5, $.text_plain]}
               value={searchText}
               onChangeText={setSearchText}
               placeholder="Search by Group ID or Customer..."
@@ -403,16 +337,16 @@ export function OrdersScreen() {
           onClose={() => setShowFilterSheet(false)}
           height="60%">
           <View style={$.flex_1}>
-            <Text style={[$.h4, $.font_weight_bold, {color: Colors.text}, $.mb_4]}>
+            <Text style={[$.h4, $.font_weight_bold, $.text_plain, $.mb_4]}>
               Filter Orders
             </Text>
 
             {/* Date Range - Single Row */}
             <View style={[$.mb_4]}>
-              <Text style={[$.h6, {color: Colors.textSecondary}, $.mb_2]}>
+              <Text style={[$.h6, $.text_muted, $.mb_2]}>
                 Date Range
               </Text>
-              <View style={[ $.flex_row, {gap: 12}]}>
+              <View style={[$.flex_row, $.gap_3]}>
                 <View style={$.flex_1}>
                   <TouchableOpacity
                     style={[
@@ -421,22 +355,20 @@ export function OrdersScreen() {
                       $.px_3,
                       $.py_2,
                       $.justify_content_center,
-                      {
-                        borderColor: Colors.divider,
-                        backgroundColor: Colors.inputBackground,
-                        minHeight: 44,
-                      },
+                      $.border_default,
+                      $.bg_inputbg,
+                      {minHeight: 44},
                     ]}
                     onPress={() => setShowFromDatePicker(true)}>
-                    <Text style={[$.h6, {color: filterFromDate ? Colors.text : Colors.textSecondary}]}>
+                    <Text style={[$.h6, filterFromDate ? $.text_plain : $.text_muted]}>
                       {filterFromDate ? formatDateGB(filterFromDate.toISOString()) : 'From Date'}
                     </Text>
                   </TouchableOpacity>
                   {filterFromDate && (
                     <TouchableOpacity
-                      style={[ $.mt_1, $.align_self_start]}
+                      style={[$.mt_1, $.align_self_start]}
                       onPress={() => setFilterFromDate(null)}>
-                      <Text style={[$.h7, {color: Colors.error}]}>Clear</Text>
+                      <Text style={[$.h7, $.text_danger]}>Clear</Text>
                     </TouchableOpacity>
                   )}
                   <DatePickerComponent
@@ -459,22 +391,20 @@ export function OrdersScreen() {
                       $.px_3,
                       $.py_2,
                       $.justify_content_center,
-                      {
-                        borderColor: Colors.divider,
-                        backgroundColor: Colors.inputBackground,
-                        minHeight: 44,
-                      },
+                      $.border_default,
+                      $.bg_inputbg,
+                      {minHeight: 44},
                     ]}
                     onPress={() => setShowToDatePicker(true)}>
-                    <Text style={[$.h6, {color: filterToDate ? Colors.text : Colors.textSecondary}]}>
+                    <Text style={[$.h6, filterToDate ? $.text_plain : $.text_muted]}>
                       {filterToDate ? formatDateGB(filterToDate.toISOString()) : 'To Date'}
                     </Text>
                   </TouchableOpacity>
                   {filterToDate && (
                     <TouchableOpacity
-                      style={[ $.mt_1, $.align_self_start]}
+                      style={[$.mt_1, $.align_self_start]}
                       onPress={() => setFilterToDate(null)}>
-                      <Text style={[$.h7, {color: Colors.error}]}>Clear</Text>
+                      <Text style={[$.h7, $.text_danger]}>Clear</Text>
                     </TouchableOpacity>
                   )}
                   <DatePickerComponent
@@ -494,7 +424,7 @@ export function OrdersScreen() {
 
             {/* Status Filter */}
             <View style={$.mb_4}>
-              <Text style={[$.h6, {color: Colors.textSecondary}, $.mb_2]}>
+              <Text style={[$.h6, $.text_muted, $.mb_2]}>
                 Order Status
               </Text>
               
@@ -505,7 +435,8 @@ export function OrdersScreen() {
                   $.bg_inputbg,
                   $.border_rounded_1,
                   $.mb_3,
-                  {padding: 2, gap: 4},
+                  $.p_05,
+                  $.gap_1,
                 ]}>
                 <TouchableOpacity
                   style={[
@@ -513,13 +444,8 @@ export function OrdersScreen() {
                     $.py_2,
                     $.px_3,
                     $.align_items_center,
-                    {
-                      borderRadius: 6,
-                      backgroundColor:
-                        !showPendingOnly && filterStatus === null
-                          ? Colors.textSecondary
-                          : undefined,
-                    },
+                    $.border_rounded_05,
+                    !showPendingOnly && filterStatus === null && $.bg_grey,
                   ]}
                   onPress={() => {
                     setShowPendingOnly(false);
@@ -531,10 +457,10 @@ export function OrdersScreen() {
                       $.text_muted,
                       $.font_weight_500,
                       !showPendingOnly &&
-                        filterStatus === null && {
-                          color: Colors.background,
-                          ...$.font_weight_600,
-                        },
+                        filterStatus === null && [
+                          $.text_white,
+                          $.font_weight_600,
+                        ],
                     ]}>
                     All
                   </Text>
@@ -545,12 +471,8 @@ export function OrdersScreen() {
                     $.py_2,
                     $.px_3,
                     $.align_items_center,
-                    {
-                      borderRadius: 6,
-                      backgroundColor: showPendingOnly
-                        ? Colors.textSecondary
-                        : undefined,
-                    },
+                    $.border_rounded_05,
+                    showPendingOnly && $.bg_grey,
                   ]}
                   onPress={() => {
                     setShowPendingOnly(true);
@@ -561,10 +483,10 @@ export function OrdersScreen() {
                       $.h6,
                       $.text_muted,
                       $.font_weight_500,
-                      showPendingOnly && {
-                        color: Colors.background,
-                        ...$.font_weight_600,
-                      },
+                      showPendingOnly && [
+                        $.text_white,
+                        $.font_weight_600,
+                      ],
                     ]}>
                     Pending
                   </Text>
@@ -573,7 +495,7 @@ export function OrdersScreen() {
 
               {/* Individual Status Options */}
               <View style={$.mt_2}>
-                <Text style={[$.h7, {color: Colors.textSecondary}, $.mb_2]}>
+                <Text style={[$.h7, $.text_muted, $.mb_2]}>
                   Filter by Status:
                 </Text>
                 <View style={[$.flex_row, $.flex_wrap_wrap, $.gap_2]}>
@@ -591,15 +513,10 @@ export function OrdersScreen() {
                         $.bg_inputbg,
                         $.border,
                         $.align_items_center,
-                        {
-                          minWidth: 80,
-                          borderColor: Colors.divider,
-                          ...(filterStatus === statusOption.value && {
-                            backgroundColor: Colors.textSecondary,
-                            borderColor: Colors.textSecondary,
-                            borderWidth: 2,
-                          }),
-                        },
+                        {minWidth: 80},
+                        filterStatus === statusOption.value
+                          ? [$.bg_grey, $.border_grey, $.border_2]
+                          : $.border_default,
                       ]}
                       onPress={() => {
                         if (filterStatus === statusOption.value) {
@@ -614,11 +531,11 @@ export function OrdersScreen() {
                         style={[
                           $.h7,
                           $.font_weight_500,
-                          {color: Colors.text},
-                          filterStatus === statusOption.value && {
-                            color: Colors.background,
-                            ...$.font_weight_600,
-                          },
+                          $.text_plain,
+                          filterStatus === statusOption.value && [
+                            $.text_white,
+                            $.font_weight_600,
+                          ],
                         ]}>
                         {statusOption.label}
                       </Text>
@@ -629,7 +546,7 @@ export function OrdersScreen() {
             </View>
 
             {/* Action Buttons */}
-            <View style={[ $.flex_row, $.mt_4, {gap: 12}]}>
+            <View style={[$.flex_row, $.mt_4, $.gap_3]}>
               <TouchableOpacity
                 style={[
                   $.flex_1,
@@ -638,10 +555,11 @@ export function OrdersScreen() {
                   $.justify_content_center,
                   $.bg_inputbg,
                   $.border,
-                  {paddingVertical: 14, borderColor: Colors.divider},
+                  $.border_default,
+                  $.py_3,
                 ]}
                 onPress={handleClearFilters}>
-                <Text style={[$.h5, $.font_weight_600, {color: Colors.text}]}>
+                <Text style={[$.h5, $.font_weight_600, $.text_plain]}>
                   Clear All
                 </Text>
               </TouchableOpacity>
@@ -651,10 +569,11 @@ export function OrdersScreen() {
                   $.border_rounded_1,
                   $.align_items_center,
                   $.justify_content_center,
-                  {paddingVertical: 14, backgroundColor: Colors.textSecondary},
+                  $.bg_grey,
+                  $.py_3,
                 ]}
                 onPress={handleApplyFilters}>
-                <Text style={[$.h5, $.font_weight_600, {color: Colors.background}]}>
+                <Text style={[$.h5, $.font_weight_600, $.text_white]}>
                   Apply Filters
                 </Text>
               </TouchableOpacity>

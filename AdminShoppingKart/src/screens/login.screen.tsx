@@ -137,7 +137,7 @@ const handleSaveUrl = () => {
 
 
   return (
-    <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
+    <SafeAreaView style={[$.flex_1, $.bg_background]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={$.flex_1}
@@ -145,7 +145,7 @@ const handleSaveUrl = () => {
       >
         <ScrollView
           contentContainerStyle={[
-            {flexGrow: 1},
+            $.flex_1,
             $.justify_content_center,
             $.px_4,
             $.py_4,
@@ -158,12 +158,7 @@ const handleSaveUrl = () => {
           <View style={[$.mb_6, $.align_items_center]}>
             <Image
               source={require('../asserts/quanto_dark.png')}
-              style={{
-                width: 200,
-                height: 80,
-                resizeMode: 'contain',
-                marginBottom: 32,
-              }}
+              style={{width: 200, height: 80, resizeMode: 'contain', marginBottom: 32}}
             />
           </View>
 
@@ -177,18 +172,16 @@ const handleSaveUrl = () => {
               $.px_3,
               $.py_3,
               $.border_rounded_1,
-              {
-                backgroundColor: Colors.inputBackground,
-                borderWidth: 1,
-                borderColor: Colors.divider,
-              },
+              $.bg_inputbg,
+              $.border,
+              $.border_default,
             ]}>
             <View style={[$.flex_1, $.mr_2]}>
-              <Text style={[$.h7, {color: Colors.textSecondary}, $.mb_1]}>
+              <Text style={[$.h7, $.text_muted, $.mb_1]}>
                 Server URL
               </Text>
               <Text
-                style={[$.h6, {color: Colors.text}]}
+                style={[$.h6, $.text_plain]}
                 numberOfLines={1}
                 ellipsizeMode="tail">
                 {environmentState.url ||
@@ -197,7 +190,7 @@ const handleSaveUrl = () => {
             </View>
             <TouchableOpacity
               onPress={() => setShowUrlEditor(!showUrlEditor)}
-              style={[$.p_2, {borderRadius: 8}]}
+              style={[$.p_2, $.border_rounded_1]}
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
               <CustomIcon
                 name={showUrlEditor ? CustomIcons.Close : CustomIcons.Edit}
@@ -214,13 +207,11 @@ const handleSaveUrl = () => {
                 $.mb_5,
                 $.p_4,
                 $.border_rounded_1,
-                {
-                  backgroundColor: Colors.inputBackground,
-                  borderWidth: 1,
-                  borderColor: Colors.divider,
-                },
+                $.bg_inputbg,
+                $.border,
+                $.border_default,
               ]}>
-              <Text style={[$.h6, {color: Colors.text}, $.mb_3]}>Base URL</Text>
+              <Text style={[$.h6, $.text_plain, $.mb_3]}>Base URL</Text>
               <TextInput
                 style={[
                   $.border,
@@ -229,11 +220,9 @@ const handleSaveUrl = () => {
                   $.py_3,
                   $.h6,
                   $.mb_3,
-                  {
-                    borderColor: Colors.divider,
-                    backgroundColor: Colors.background,
-                    color: Colors.text,
-                  },
+                  $.border_default,
+                  $.bg_background,
+                  $.text_plain,
                 ]}
                 value={baseUrl}
                 onChangeText={setBaseUrl}
@@ -253,11 +242,11 @@ const handleSaveUrl = () => {
                     $.py_3,
                     $.border_rounded_1,
                     $.align_items_center,
-                    {backgroundColor: Colors.primary},
+                    $.bg_primary,
                   ]}
                   activeOpacity={0.7}>
                   <Text
-                    style={[$.h6, $.font_weight_600, {color: Colors.background}]}>
+                    style={[$.h6, $.font_weight_600, $.text_white]}>
                     Save
                   </Text>
                 </TouchableOpacity>
@@ -274,17 +263,15 @@ const handleSaveUrl = () => {
                     $.py_3,
                     $.border_rounded_1,
                     $.align_items_center,
-                    {
-                      backgroundColor: Colors.inputBackground,
-                      borderWidth: 1,
-                      borderColor: Colors.divider,
-                    },
+                    $.bg_inputbg,
+                    $.border,
+                    $.border_default,
                   ]}
                   activeOpacity={0.7}>
-                  <Text style={[$.h6, {color: Colors.text}]}>Cancel</Text>
+                  <Text style={[$.h6, $.text_plain]}>Cancel</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={[$.h7, {color: Colors.textSecondary}]}>
+              <Text style={[$.h7, $.text_muted]}>
                 Current:{' '}
                 {environmentState.url ||
                   environment.baseurl}
@@ -298,13 +285,11 @@ const handleSaveUrl = () => {
                 $.h5,
                 $.border,
                 $.border_rounded_2,
-                {
-                  height: 56,
-                  borderColor: mobileError ? Colors.error : Colors.divider,
-                  backgroundColor: Colors.inputBackground,
-                  paddingHorizontal: 16,
-                  color: Colors.text,
-                },
+                {height: 56},
+                mobileError ? $.border_danger : $.border_default,
+                $.bg_inputbg,
+                $.px_4,
+                $.text_plain,
               ]}
               value={mobileNumber}
               onChangeText={handleMobileChange}
@@ -321,12 +306,10 @@ const handleSaveUrl = () => {
               <Text
                 style={[
                   $.h6,
-                  {
-                    color: Colors.error,
-                    marginTop: 8,
-                    paddingLeft: 4,
-                    marginBottom: 4,
-                  },
+                  $.text_danger,
+                  $.mt_2,
+                  $.pl_1,
+                  $.mb_1,
                 ]}>
                 {mobileError}
               </Text>
@@ -340,7 +323,7 @@ const handleSaveUrl = () => {
               $.border_rounded_2,
               $.align_items_center,
               $.justify_content_center,
-              {backgroundColor: Colors.primary},
+              $.bg_primary,
               $.mb_4,
             ]}
             onPress={handleLogin}
@@ -350,7 +333,7 @@ const handleSaveUrl = () => {
               <ActivityIndicator size="small" color={Colors.background} />
             ) : (
               <Text
-                style={[$.h4, $.font_weight_600, {color: Colors.background}]}>
+                style={[$.h4, $.font_weight_600, $.text_white]}>
                 Continue
               </Text>
             )}

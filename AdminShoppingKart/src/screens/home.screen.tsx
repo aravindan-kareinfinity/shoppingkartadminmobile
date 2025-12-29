@@ -12,13 +12,13 @@ export function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   return (
-    <SafeAreaView style={[$.flex_1, {backgroundColor: Colors.background}]}>
+    <SafeAreaView style={[$.flex_1, $.bg_background]}>
       <ScrollView style={[$.flex_1, $.px_4, $.py_3]}>
         <View style={[$.mb_5]}>
-          <Text style={[$.h3, $.font_weight_bold, {color: Colors.text}, $.mb_2]}>
+          <Text style={[$.h3, $.font_weight_bold, $.text_plain, $.mb_2]}>
             Dashboard
           </Text>
-          <Text style={[$.h5, {color: Colors.textSecondary}]}>
+          <Text style={[$.h5, $.text_muted]}>
             Welcome to Admin Shopping Kart
           </Text>
         </View>
@@ -29,14 +29,14 @@ export function HomeScreen() {
               $.py_4,
               $.px_4,
               $.border_rounded_2,
-              {backgroundColor: Colors.primary},
+              $.bg_primary,
               $.mb_3,
             ]}
             onPress={() => navigation.navigate('Scanner')}>
-            <Text style={[$.h4, $.font_weight_600, {color: Colors.background}]}>
+            <Text style={[$.h4, $.font_weight_600, $.text_white]}>
               Scanner
             </Text>
-            <Text style={[$.h6, {color: Colors.background, opacity: 0.8}]}>
+            <Text style={[$.h6, $.text_white, $.opacity_75]}>
               Scan barcode to search orders
             </Text>
           </TouchableOpacity>

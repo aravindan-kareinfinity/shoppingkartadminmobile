@@ -14,7 +14,12 @@ export class SkuBarcodeMapService {
   }
 
   async searchByBarcode(barcode: string): Promise<SkuBarcodeMap[]> {
-    const response = await axios.post(`${this.getBaseUrl()}/api/SkuBarcodeMap/SearchByBarcode`, {barcode});
-    return response.data;
+    try {
+      const response = await axios.post(`${this.getBaseUrl()}/api/SkuBarcodeMap/SearchByBarcode`, {barcode});
+      return response.data;
+    } catch (error) {
+      console.error('Error in SkuBarcodeMapService.searchByBarcode:', error);
+      throw error;
+    }
   }
 }

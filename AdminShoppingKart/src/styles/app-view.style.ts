@@ -54,6 +54,7 @@ export class AppView {
   m_5: StyleProp<ViewStyle> = {margin: this.spacer * 2.5};
   m_6: StyleProp<ViewStyle> = {margin: this.spacer * 3};
 
+  mt_05: StyleProp<ViewStyle> = {marginTop: this.spacer * 0.25};
   mt_1: StyleProp<ViewStyle> = {marginTop: this.spacer * 0.5};
   mt_2: StyleProp<ViewStyle> = {marginTop: this.spacer};
   mt_3: StyleProp<ViewStyle> = {marginTop: this.spacer * 1.5};
@@ -70,12 +71,14 @@ export class AppView {
   mb_5: StyleProp<ViewStyle> = {marginBottom: this.spacer * 2.5};
   mb_6: StyleProp<ViewStyle> = {marginBottom: this.spacer * 3};
 
+  mr_05: StyleProp<ViewStyle> = {marginRight: this.spacer * 0.25};
   mr_1: StyleProp<ViewStyle> = {marginRight: this.spacer * 0.5};
   mr_2: StyleProp<ViewStyle> = {marginRight: this.spacer};
   mr_3: StyleProp<ViewStyle> = {marginRight: this.spacer * 1.5};
   mr_4: StyleProp<ViewStyle> = {marginRight: this.spacer * 2};
   mr_5: StyleProp<ViewStyle> = {marginRight: this.spacer * 2.5};
 
+  ml_05: StyleProp<ViewStyle> = {marginLeft: this.spacer * 0.25};
   ml_1: StyleProp<ViewStyle> = {marginLeft: this.spacer * 0.5};
   ml_2: StyleProp<ViewStyle> = {marginLeft: this.spacer};
   ml_3: StyleProp<ViewStyle> = {marginLeft: this.spacer * 1.5};
@@ -152,10 +155,17 @@ export class AppView {
 
   /* border */
   border: StyleProp<ViewStyle> = {borderWidth: 1};
+  border_0: StyleProp<ViewStyle> = {borderWidth: 0};
+  border_2: StyleProp<ViewStyle> = {borderWidth: 2};
   border_bottom: StyleProp<ViewStyle> = {borderBottomWidth: 1};
+  border_bottom_2: StyleProp<ViewStyle> = {borderBottomWidth: 2};
   border_top: StyleProp<ViewStyle> = {borderTopWidth: 1};
+  border_top_2: StyleProp<ViewStyle> = {borderTopWidth: 2};
   border_right: StyleProp<ViewStyle> = {borderRightWidth: 1};
+  border_right_2: StyleProp<ViewStyle> = {borderRightWidth: 2};
   border_left: StyleProp<ViewStyle> = {borderLeftWidth: 1};
+  border_left_2: StyleProp<ViewStyle> = {borderLeftWidth: 2};
+  border_left_4: StyleProp<ViewStyle> = {borderLeftWidth: 4};
 
   border_rounded_05: StyleProp<ViewStyle> = {borderRadius: 2};
   border_rounded: StyleProp<ViewStyle> = {borderRadius: 4};
@@ -168,6 +178,7 @@ export class AppView {
   /* width & height */
   w_100: StyleProp<ViewStyle> = {width: '100%'};
   h_100: StyleProp<ViewStyle> = {height: '100%'};
+  min_h_400: StyleProp<ViewStyle> = {minHeight: 400};
 
   /* elevation */
   elevation_1: StyleProp<ViewStyle> = {elevation: 1};
@@ -203,8 +214,7 @@ export class AppView {
     elevation: 8,
   };
 
-  /* icon sizes */
-  s_medium: StyleProp<ViewStyle> = {fontSize: 20};
+  /* icon sizes - removed fontSize as it's not a ViewStyle property */
 
   /* color references */
   tint_1: string = Colors.primary;

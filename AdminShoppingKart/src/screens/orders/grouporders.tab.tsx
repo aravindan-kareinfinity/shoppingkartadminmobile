@@ -125,10 +125,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
           $.px_3,
           $.py_2,
           $.border,
-          {
-            marginBottom: 8,
-            borderColor: Colors.divider,
-          },
+          $.border_default,
+          $.mb_2,
         ]}
         onPress={() => {
           if (item.groupid) {
@@ -144,14 +142,14 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
           ]}>
           <View style={[$.flex_1]}>
             <View style={[$.flex_row, $.align_items_center]}>
-              <Text style={[$.h6, $.font_weight_600, {color: Colors.text}]}>
+              <Text style={[$.h6, $.font_weight_600, $.text_plain]}>
                 #{item.groupid} | Qty: {item.totalquantity} | {formatDateGB(item.orderdate)}
               </Text>
             </View>
             {item.customername && (
               <Text
                 numberOfLines={1}
-                style={[$.h7, {color: Colors.textSecondary, marginTop: 2}]}>
+                style={[$.h7, $.text_muted, $.mt_05]}>
                 {item.customername} ( {item.mobilenumber} )
               </Text>
             )}
@@ -163,33 +161,27 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
             <View
               style={[
                 $.mb_1,
-                {
-                  borderWidth: 1,
-                  borderColor: Colors.divider,
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                },
+                $.border,
+                $.border_default,
+                $.border_rounded_05,
+                {overflow: 'hidden'},
               ]}>
               {/* Table Header */}
               <View
                 style={[
                   $.flex_row,
-                  {
-                    backgroundColor: ColorPalette.backgroundSecondary,
-                    borderBottomWidth: 1,
-                    borderBottomColor: Colors.divider,
-                    paddingVertical: 6,
-                    paddingHorizontal: 8,
-                  },
+                  $.bg_backgroundSecondary,
+                  $.border_bottom,
+                  $.border_default,
+                  $.py_1,
+                  $.px_2,
                 ]}>
                 <Text
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 2,
-                    },
+                    $.text_plain,
+                    {flex: 2},
                   ]}>
                   Design Code
                 </Text>
@@ -197,11 +189,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 1,
-                      textAlign: 'center',
-                    },
+                    $.text_plain,
+                    {flex: 1, textAlign: 'center'},
                   ]}>
                   Size
                 </Text>
@@ -209,11 +198,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 1,
-                      textAlign: 'center',
-                    },
+                    $.text_plain,
+                    {flex: 1, textAlign: 'center'},
                   ]}>
                   Color
                 </Text>
@@ -221,11 +207,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 0.8,
-                      textAlign: 'right',
-                    },
+                    $.text_plain,
+                    {flex: 0.8, textAlign: 'right'},
                   ]}>
                   Qty
                 </Text>
@@ -237,22 +220,17 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   key={index}
                   style={[
                     $.flex_row,
-                    {
-                      paddingVertical: 6,
-                      paddingHorizontal: 8,
-                      borderBottomWidth: index < products.length - 1 ? 1 : 0,
-                      borderBottomColor: Colors.divider,
-                      backgroundColor: index % 2 === 0 ? Colors.background : ColorPalette.backgroundSecondary,
-                    },
+                    $.py_1,
+                    $.px_2,
+                    index < products.length - 1 ? [$.border_bottom, $.border_default] : {},
+                    index % 2 === 0 ? $.bg_background : $.bg_backgroundSecondary,
                   ]}>
                   <Text
                     numberOfLines={1}
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 2,
-                      },
+                      $.text_plain,
+                      {flex: 2},
                     ]}>
                     {product.designCode}
                   </Text>
@@ -260,11 +238,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                     numberOfLines={1}
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 1,
-                        textAlign: 'center',
-                      },
+                      $.text_plain,
+                      {flex: 1, textAlign: 'center'},
                     ]}>
                     {product.size}
                   </Text>
@@ -272,22 +247,16 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                     numberOfLines={1}
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 1,
-                        textAlign: 'center',
-                      },
+                      $.text_plain,
+                      {flex: 1, textAlign: 'center'},
                     ]}>
                     {product.color}
                   </Text>
                   <Text
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 0.8,
-                        textAlign: 'right',
-                      },
+                      $.text_plain,
+                      {flex: 0.8, textAlign: 'right'},
                     ]}>
                     {product.qty}
                   </Text>
@@ -300,33 +269,27 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
             <View
               style={[
                 $.mb_1,
-                {
-                  borderWidth: 1,
-                  borderColor: Colors.divider,
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                },
+                $.border,
+                $.border_default,
+                $.border_rounded_05,
+                {overflow: 'hidden'},
               ]}>
               {/* Shipments Table Header */}
               <View
                 style={[
                   $.flex_row,
-                  {
-                    backgroundColor: ColorPalette.backgroundSecondary,
-                    borderBottomWidth: 1,
-                    borderBottomColor: Colors.divider,
-                    paddingVertical: 6,
-                    paddingHorizontal: 8,
-                  },
+                  $.bg_backgroundSecondary,
+                  $.border_bottom,
+                  $.border_default,
+                  $.py_1,
+                  $.px_2,
                 ]}>
                 <Text
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 1,
-                    },
+                    $.text_plain,
+                    {flex: 1},
                   ]}>
                   Shipment ID
                 </Text>
@@ -334,11 +297,8 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   style={[
                     $.h7,
                     $.font_weight_600,
-                    {
-                      color: Colors.text,
-                      flex: 1,
-                      textAlign: 'center',
-                    },
+                    $.text_plain,
+                    {flex: 1, textAlign: 'center'},
                   ]}>
                   Status
                 </Text>
@@ -350,13 +310,10 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   key={index}
                   style={[
                     $.flex_row,
-                    {
-                      paddingVertical: 6,
-                      paddingHorizontal: 8,
-                      borderBottomWidth: index < shipments.length - 1 ? 1 : 0,
-                      borderBottomColor: Colors.divider,
-                      backgroundColor: index % 2 === 0 ? Colors.background : ColorPalette.backgroundSecondary,
-                    },
+                    $.py_1,
+                    $.px_2,
+                    index < shipments.length - 1 ? [$.border_bottom, $.border_default] : {},
+                    index % 2 === 0 ? $.bg_background : $.bg_backgroundSecondary,
                   ]}
                   onPress={() => {
                     appNavigation.navigate('CreateShipment', {
@@ -369,21 +326,16 @@ function OrderGroupCard({item, navigation, appNavigation}: {item: OrderGroupGetW
                   <Text
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 1,
-                      },
+                      $.text_plain,
+                      {flex: 1},
                     ]}>
                     #{shipment.id}
                   </Text>
                   <Text
                     style={[
                       $.h7,
-                      {
-                        color: Colors.text,
-                        flex: 1,
-                        textAlign: 'center',
-                      },
+                      $.text_plain,
+                      {flex: 1, textAlign: 'center'},
                     ]}>
                     {shipment.statusName}
                   </Text>
@@ -402,10 +354,6 @@ export function GroupOrdersTab(props: GroupOrdersTabProps) {
   const navigation = useNavigation<GroupOrdersTabNavigationProp>();
   const appNavigation = useNavigation<AppNavigationProp>();
 
-  const renderOrderGroupCard = ({item}: {item: OrderGroupGetWithDetailsRes}) => (
-    <OrderGroupCard item={item} navigation={navigation} appNavigation={appNavigation} />
-  );
-
   if (isLoading && data.length === 0) {
     return (
       <View style={[$.flex_1, $.justify_content_center, $.align_items_center]}>
@@ -417,12 +365,12 @@ export function GroupOrdersTab(props: GroupOrdersTabProps) {
   if (data.length === 0) {
     return (
       <View style={[$.flex_1, $.justify_content_center, $.align_items_center]}>
-        <Text style={[$.h5, {color: Colors.textSecondary}]}>No orders found</Text>
+        <Text style={[$.h5, $.text_muted]}>No orders found</Text>
         {hasActiveFilters && (
           <TouchableOpacity
             style={[$.mt_3, $.py_2, $.px_4, $.border_rounded_1, $.bg_inputbg]}
             onPress={onClearFilters}>
-            <Text style={[$.h6, {color: Colors.primary}]}>Clear Filters</Text>
+            <Text style={[$.h6, $.text_primary]}>Clear Filters</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -432,7 +380,9 @@ export function GroupOrdersTab(props: GroupOrdersTabProps) {
   return (
     <FlatList
       data={data}
-      renderItem={renderOrderGroupCard}
+      renderItem={({item}) => (
+        <OrderGroupCard item={item} navigation={navigation} appNavigation={appNavigation} />
+      )}
       keyExtractor={keyExtractor}
       contentContainerStyle={listContainerStyle}
       refreshing={isLoading}

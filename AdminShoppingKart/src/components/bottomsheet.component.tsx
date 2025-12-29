@@ -3,7 +3,6 @@ import {
   Modal,
   View,
   TouchableOpacity,
-  StyleSheet,
   Dimensions,
   TouchableWithoutFeedback,
   ScrollView,
@@ -42,28 +41,36 @@ export function BottomSheet({
       animationType="slide"
       onRequestClose={onClose}
       statusBarTranslucent={true}>
-      <View style={styles.overlay}>
+      <View style={[$.flex_1, $.bg_overlay, $.justify_content_end]}>
         <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.overlayBackdrop} />
+          <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}} />
         </TouchableWithoutFeedback>
-        <View style={[styles.sheet, {height: sheetHeight}]}>
+        <View
+          style={[
+            $.bg_background,
+            $.w_100,
+            {overflow: 'hidden', borderTopLeftRadius: 20, borderTopRightRadius: 20, height: sheetHeight},
+          ]}>
           {showHandle && (
-            <TouchableOpacity onPress={onClose} style={styles.handleContainer} activeOpacity={0.7}>
-              <View style={styles.handle} />
+            <TouchableOpacity
+              onPress={onClose}
+              style={[$.w_100, $.align_items_center, $.py_1]}
+              activeOpacity={0.7}>
+              <View style={{width: 40, height: 4, backgroundColor: Colors.divider, borderRadius: 2}} />
             </TouchableOpacity>
           )}
           {scrollable ? (
-            <ScrollView 
-              style={styles.scrollContent} 
+            <ScrollView
+              style={[$.flex_1]}
               showsVerticalScrollIndicator={true}
-              contentContainerStyle={styles.scrollContentContainer}
+              contentContainerStyle={[$.p_2, {paddingBottom: 20}]}
               nestedScrollEnabled={true}
               bounces={false}
               keyboardShouldPersistTaps="handled">
               {children}
             </ScrollView>
           ) : (
-            <View style={styles.nonScrollableContent}>
+            <View style={[$.p_2, $.flex_1]}>
               {children}
             </View>
           )}
@@ -72,48 +79,3 @@ export function BottomSheet({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: Colors.overlay,
-    justifyContent: 'flex-end',
-  },
-  overlayBackdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  sheet: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    width: '100%',
-    overflow: 'hidden',
-  },
-  handleContainer: {
-    width: '100%',
-    alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.divider,
-    borderRadius: 2,
-  },
-  scrollContent: {
-    flex: 1,
-  },
-  scrollContentContainer: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  nonScrollableContent: {
-    padding: 16,
-    flex: 1,
-  },
-});

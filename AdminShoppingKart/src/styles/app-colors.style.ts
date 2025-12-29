@@ -108,7 +108,7 @@ export class AppColors {
   bg_backgroundSecondary: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.backgroundSecondary};
   bg_backgroundTertiary: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.backgroundTertiary};
   bg_inputbg: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.inputBackground};
-  bg_grey: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.gray300};
+  bg_grey: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.textSecondary};
   bg_card: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.backgroundSecondary};
   bg_card2: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.white};
   bg_app: StyleProp<ViewStyle> = {backgroundColor: ColorPalette.backgroundSecondary};
@@ -130,4 +130,12 @@ export class AppColors {
   border_white: StyleProp<ViewStyle> = {borderColor: ColorPalette.white};
   border_input: StyleProp<ViewStyle> = {borderColor: ColorPalette.inputBorder};
   border_inputFocus: StyleProp<ViewStyle> = {borderColor: ColorPalette.inputFocus};
+  border_grey: StyleProp<ViewStyle> = {borderColor: ColorPalette.textSecondary};
+
+  /* border left colors */
+  border_left_primary: StyleProp<ViewStyle> = {borderLeftColor: ColorPalette.primary};
+  border_left_danger: StyleProp<ViewStyle> = {borderLeftColor: ColorPalette.error};
+  border_left_success: StyleProp<ViewStyle> = {borderLeftColor: ColorPalette.success};
+  border_left_warning: StyleProp<ViewStyle> = {borderLeftColor: ColorPalette.warning};
+  border_left_info: StyleProp<ViewStyle> = {borderLeftColor: ColorPalette.info};
 }

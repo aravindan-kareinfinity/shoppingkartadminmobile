@@ -20,10 +20,6 @@ import {
   OrderMoveToNextStatusReq,
   OrdersGroupByVendorReq,
   OrdersGroupByVendorRes,
-  OrderGetCustomerSummaryReq,
-  OrderGetCustomerSummaryRes,
-  GetWithDetailCustomerReq,
-  GetWithDetailCustomerRes,
 } from '../models/orders.model';
 
 export class OrdersService {
@@ -49,17 +45,6 @@ export class OrdersService {
     postData.item = req;
     const resp = await axios.post<ActionRes<OrderGroupGetWithDetailsRes[]>>(
       `${this.getBaseUrl()}/api/Orders/GetWithDetailsGroup`,
-      postData
-    );
-    return resp.data.item ?? [];
-  }
-
-  // Customer summary by customer (mobile)
-  async getWithDetailCustomer(req: GetWithDetailCustomerReq): Promise<GetWithDetailCustomerRes[]> {
-    const postData: ActionReq<GetWithDetailCustomerReq> = new ActionReq<GetWithDetailCustomerReq>();
-    postData.item = req;
-    const resp = await axios.post<ActionRes<GetWithDetailCustomerRes[]>>(
-      `${this.getBaseUrl()}/api/Orders/GetWithDetailCustomer`,
       postData
     );
     return resp.data.item ?? [];
@@ -196,16 +181,6 @@ export class OrdersService {
       throw error;
     }
     return result;
-  }
-
-  async getCustomerSummary(req: OrderGetCustomerSummaryReq): Promise<OrderGetCustomerSummaryRes[]> {
-    const postData: ActionReq<OrderGetCustomerSummaryReq> = new ActionReq<OrderGetCustomerSummaryReq>();
-    postData.item = req;
-    const resp = await axios.post<ActionRes<OrderGetCustomerSummaryRes[]>>(
-      `${this.getBaseUrl()}/api/Orders/GetCustomerSummary`,
-      postData
-    );
-    return resp.data.item ?? [];
   }
 
 }

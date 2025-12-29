@@ -21,6 +21,10 @@ import {
   UserOrderReturnRefundReq,
   UserOrderShipmentGroupCreateShiprocketReturnOrderReq,
   UserOrderShipmentGroupCreateShiprocketReturnOrderRes,
+  UserAdminPanelDashboardReq,
+  UserAdminPanelDashboardRes,
+  UsersAdminPanelDashboardOrderStatusChartReq,
+  UsersAdminPanelDashboardOrderStatusChartRes,
 } from '../models/users.model';
 
 export class UsersService {
@@ -43,6 +47,7 @@ export class UsersService {
       );
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.select:', error);
       throw error;
     }
     return result;
@@ -60,6 +65,7 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.saveWithDetails:', error);
       throw error;
     }
     return result;
@@ -77,6 +83,7 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.insert:', error);
       throw error;
     }
     return result;
@@ -94,6 +101,7 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.signUp:', error);
       throw error;
     }
     return result;
@@ -110,6 +118,7 @@ export class UsersService {
       );
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.update:', error);
       throw error;
     }
     return result;
@@ -127,6 +136,7 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.delete:', error);
       throw error;
     }
     return result;
@@ -167,121 +177,167 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.validateOtp:', error);
       throw error;
     }
     return result;
   }
 
   async OrderConfirm(req: UserOrderConfirmReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderConfirmReq> =
-      new ActionReq<UserOrderConfirmReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderConfirm',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderConfirmReq> =
+        new ActionReq<UserOrderConfirmReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderConfirm',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderConfirm:', error);
+      throw error;
+    }
   }
 
   async OrderPicked(req: UserOrderPickedReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderPickedReq> =
-      new ActionReq<UserOrderPickedReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderPicked',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderPickedReq> =
+        new ActionReq<UserOrderPickedReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderPicked',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderPicked:', error);
+      throw error;
+    }
   }
 
   async OrderChecked(req: UserOrderCheckedReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderCheckedReq> =
-      new ActionReq<UserOrderCheckedReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderChecked',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderCheckedReq> =
+        new ActionReq<UserOrderCheckedReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderChecked',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderChecked:', error);
+      throw error;
+    }
   }
 
   async OrderPacked(req: UserOrderPackedReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderPackedReq> =
-      new ActionReq<UserOrderPackedReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderPacked',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderPackedReq> =
+        new ActionReq<UserOrderPackedReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderPacked',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderPacked:', error);
+      throw error;
+    }
   }
 
   async OrderRefundAndCancel(req: UserOrderRefundAndCancelReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderRefundAndCancelReq> =
-      new ActionReq<UserOrderRefundAndCancelReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderRefundAndCancel',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderRefundAndCancelReq> =
+        new ActionReq<UserOrderRefundAndCancelReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderRefundAndCancel',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderRefundAndCancel:', error);
+      throw error;
+    }
   }
 
   async OrderClose(req: UserOrderCloseReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderCloseReq> =
-      new ActionReq<UserOrderCloseReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderClose',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderCloseReq> =
+        new ActionReq<UserOrderCloseReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderClose',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderClose:', error);
+      throw error;
+    }
   }
 
   async OrderCancel(req: UserOrderCancelReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderCancelReq> =
-      new ActionReq<UserOrderCancelReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderCancel',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderCancelReq> =
+        new ActionReq<UserOrderCancelReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderCancel',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderCancel:', error);
+      throw error;
+    }
   }
 
   async OrderShipmentGroupCreateShiprocketReturnOrder(
     req: UserOrderShipmentGroupCreateShiprocketReturnOrderReq
   ): Promise<UserOrderShipmentGroupCreateShiprocketReturnOrderRes> {
-    var postData: ActionReq<UserOrderShipmentGroupCreateShiprocketReturnOrderReq> =
-      new ActionReq<UserOrderShipmentGroupCreateShiprocketReturnOrderReq>();
-    postData.item = req;
-    var resp = await axios.post<
-      ActionRes<UserOrderShipmentGroupCreateShiprocketReturnOrderRes>
-    >(
-      this.getBaseUrl() + '/OrderShipmentGroupCreateShiprocketReturnOrder',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderShipmentGroupCreateShiprocketReturnOrderReq> =
+        new ActionReq<UserOrderShipmentGroupCreateShiprocketReturnOrderReq>();
+      postData.item = req;
+      var resp = await axios.post<
+        ActionRes<UserOrderShipmentGroupCreateShiprocketReturnOrderRes>
+      >(
+        this.getBaseUrl() + '/OrderShipmentGroupCreateShiprocketReturnOrder',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderShipmentGroupCreateShiprocketReturnOrder:', error);
+      throw error;
+    }
   }
 
   async OrderReturnRefund(req: UserOrderReturnRefundReq): Promise<boolean> {
-    var postData: ActionReq<UserOrderReturnRefundReq> =
-      new ActionReq<UserOrderReturnRefundReq>();
-    postData.item = req;
-    var resp = await axios.post<ActionRes<boolean>>(
-      this.getBaseUrl() + '/OrderReturnRefund',
-      postData
-    );
+    try {
+      var postData: ActionReq<UserOrderReturnRefundReq> =
+        new ActionReq<UserOrderReturnRefundReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<boolean>>(
+        this.getBaseUrl() + '/OrderReturnRefund',
+        postData
+      );
 
-    return resp.data.item!;
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.OrderReturnRefund:', error);
+      throw error;
+    }
   }
 
   async refreshToken(req: UsersRefreshTokenReq): Promise<UsersRefreshTokenRes> {
@@ -297,8 +353,76 @@ export class UsersService {
 
       if (resp.data.item) result = resp.data.item;
     } catch (error) {
+      console.error('Error in UsersService.refreshToken:', error);
       throw error;
     }
     return result;
+  }
+
+  async AdminPanelDashboardDetail(
+    req: UserAdminPanelDashboardReq
+  ): Promise<UserAdminPanelDashboardRes> {
+    try {
+      var postData: ActionReq<UserAdminPanelDashboardReq> =
+        new ActionReq<UserAdminPanelDashboardReq>();
+      postData.item = req;
+      var resp = await axios.post<ActionRes<UserAdminPanelDashboardRes>>(
+        this.getBaseUrl() + '/AdminPanelDashboardDetail',
+        postData
+      );
+
+      return resp.data.item!;
+    } catch (error) {
+      console.error('Error in UsersService.AdminPanelDashboardDetail:', error);
+      throw error;
+    }
+  }
+
+  async AdminPanelDashboardIndividualOrderStatusChart(
+    req: UsersAdminPanelDashboardOrderStatusChartReq
+  ): Promise<UsersAdminPanelDashboardOrderStatusChartRes> {
+    try {
+      var postData: ActionReq<UsersAdminPanelDashboardOrderStatusChartReq> =
+        new ActionReq<UsersAdminPanelDashboardOrderStatusChartReq>();
+      postData.item = req;
+      var resp = await axios.post<
+        ActionRes<UsersAdminPanelDashboardOrderStatusChartRes>
+      >(
+        this.getBaseUrl() + '/AdminPanelDashboardIndividualOrderStatusChart',
+        postData
+      );
+
+      return resp.data.item!;
+    } catch (error) {
+      console.error(
+        'Error in UsersService.AdminPanelDashboardIndividualOrderStatusChart:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  async AdminPanelDashboardGrouplOrderStatusChart(
+    req: UsersAdminPanelDashboardOrderStatusChartReq
+  ): Promise<UsersAdminPanelDashboardOrderStatusChartRes> {
+    try {
+      var postData: ActionReq<UsersAdminPanelDashboardOrderStatusChartReq> =
+        new ActionReq<UsersAdminPanelDashboardOrderStatusChartReq>();
+      postData.item = req;
+      var resp = await axios.post<
+        ActionRes<UsersAdminPanelDashboardOrderStatusChartRes>
+      >(
+        this.getBaseUrl() + '/AdminPanelDashboardGrouplOrderStatusChart',
+        postData
+      );
+
+      return resp.data.item!;
+    } catch (error) {
+      console.error(
+        'Error in UsersService.AdminPanelDashboardGrouplOrderStatusChart:',
+        error
+      );
+      throw error;
+    }
   }
 }

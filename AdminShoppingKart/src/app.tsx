@@ -3,7 +3,7 @@ import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {NavigationContainer} from '@react-navigation/native';
 import {store, persistor} from './redux';
-import {AppNavigator} from './navigation/AppNavigator';
+import {AppNavigator} from './appstack.navigation';
 
 export function App() {
   return (
